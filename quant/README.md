@@ -3,7 +3,7 @@ Performs quantization of Qwen3-0.6B weights (the Kernel portion of project)
 
 src/quant/loading.py loads the 16 bit model with `load_model` and loads the INT8 model with `load_int8_model`, and records the baseline datatype with `BASELINE_DTYPE`
 
-src/quant/data.py loads WikiText-2 raw text for the purpose of evaluation, splits it into token chunks, and builds chat template inputs for the prompts in prompts.json
+src/quant/data.py loads WikiText-2 raw text for the purpose of evaluation, splits it into token chunks, and builds chat template inputs for the prompts in src/quant/prompts.json
 
 src/quant/quantize.py performs the bulk of the suppression work. it contains symmetric per output channel INT8 quantization and weight error statistics
 
@@ -13,7 +13,7 @@ src/quant/surgery.py then swaps out any linear layers inside the decoders with `
 
 src/quant/fidelity.py compares a reference model with a quantized copy. It has per layer activations, sliding window perplexity and logit agreement, and seeded side by side generation.
 
-src/quant/ext.py JIT-builds the CUDA sources in csrc/ (sm_89 only). csrc/bandwidth.cu is the streaming-read kernel used to measure peak DRAM bandwidth.
+src/quant/ext.py JIT-builds the CUDA sources in src/quant/csrc/ (sm_89 by default). src/quant/csrc/bandwidth.cu is the streaming-read kernel used to measure peak DRAM bandwidth.
 
 src/quant/bench/ is the benchmark harness: CUDA-event timing with L2 flushing (timing.py), NVML telemetry in a separate process with run rejection and run-condition metadata (telemetry.py), end-to-end decode timing (e2e.py), and CSV/JSON output to results/bench/ (report.py).
 
@@ -35,3 +35,14 @@ uv run python scripts/bench_e2e.py --precision fp16           # TTFT and decode 
 ```
 
 Benchmarks expect AC power and the performance power profile (`powerprofilesctl set performance`); the scripts warn otherwise. To lock clocks, run `sudo nvidia-smi -lgc <MHz>` first, pass `--locked-sm-mhz` to bench_e2e.py, and reset with `sudo nvidia-smi -rgc` afterwards.
+
+## Installed runtime resources
+
+The wheel bundles `src/quant/prompts.json` and CUDA source files under
+`src/quant/csrc/`. Prompt loading and JIT compilation locate these using
+`importlib.resources`, so they also work outside the source checkout. CUDA
+compilation still requires a compatible toolkit, host compiler, GPU, and Ninja;
+the wheel contains source files rather than precompiled CUDA extensions.
+
+Experiment scripts and generated `results/` remain checkout-oriented and are not
+wheel resources. Run the documented scripts from `quant/`.
