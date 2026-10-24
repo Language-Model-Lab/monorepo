@@ -49,10 +49,7 @@ Expect the root `.venv/bin/python` and this checkout's
 Run from the repository root:
 
 ```bash
-(
-  cd backend &&
-  uv run --locked --all-packages --all-groups python -m uvicorn api:app
-)
+uv run --locked --all-packages --all-groups python -m uvicorn kernel_backend.api:app
 ```
 
 - The server exposes `POST /generate`; interactive API documentation is available at
@@ -60,9 +57,10 @@ Run from the repository root:
 Startup loads `Qwen/Qwen3-0.6B` and may download its tokenizer and model weights.
 Allow sufficient memory for the model. Device placement is selected automatically.
 
-- The backend currently uses imports relative to its working directory, so launch
-it from `backend/` as shown. The response latency fields currently contain
-placeholder values and should not be used as benchmark measurements.
+- Backend is installed as the `kernel_backend` Python package, so this entry point
+also works from `backend/`. Importing the API still loads the model immediately.
+The response latency fields currently contain placeholder values and should not
+be used as benchmark measurements.
 
 ## Run tests
 
@@ -73,11 +71,10 @@ pytest configuration, while `uv run` selects the shared environment.
 ### Backend
 
 ```bash
-(
-  cd backend &&
-  uv run --locked --all-packages --all-groups python -m pytest -v -ra
-)
+uv run --locked --all-packages --all-groups python -m pytest -c backend/pyproject.toml backend/tests -v -ra
 ```
+
+From `backend/`, use `uv run --locked --all-packages --all-groups python -m pytest -v -ra`.
 
 - Validates schemas, generation helpers, and interventions. The migration baseline
 is **29 passed**. This suite does not validate server startup or real-model API

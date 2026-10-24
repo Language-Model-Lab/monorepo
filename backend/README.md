@@ -1,19 +1,45 @@
-api.py contains the API endpoints for response generation, and is written using FastAPI.  
-To run the web server and test API locally, from /backend use  
-```uv run uvicorn api:app```
+# Backend
 
-schemas.py contains the main schemas for generations, interventions, and responses.
+The installable `kernel_backend` package implements the FastAPI API, model loading,
+generation helpers, and attention/MLP interventions.
 
-model.py contains the model loading logic
+## Layout
 
-generation.py contains the functions that call the model, generate text, and intervention wrappers
+- `src/kernel_backend/api.py`: API endpoints; importing this module loads Qwen3-0.6B.
+- `src/kernel_backend/schemas.py`: request, generation, intervention, and response schemas.
+- `src/kernel_backend/model.py`: model and tokenizer loading.
+- `src/kernel_backend/generation.py`: generation and intervention orchestration.
+- `src/kernel_backend/interventions.py`: attention head and MLP ablation hooks.
+- `tests/`: schema, generation helper, and intervention tests.
+- `JSON_examples/`: sample requests and responses.
 
-interventions.py contains the functions that perform interventions on the model, like attention head ablation, MLP unit ablation, etc.
+## Development
 
-test_schemas.py contains test for correctness of all schemas.  
-test_generation.py contains tests for the basic generation functions, and for the custom stopping criteria functionality.  
-test_interventions.py contains tests for the functions that modify the models.  
-To run test session use  
-```uv run pytest -v```
+From the repository root, install the workspace:
 
-/JSON_examples contains sample JSON files that demonstrate generation requests of different kinds, and also successful and unsuccessful API responses.
+```bash
+uv sync --locked --all-packages --all-groups
+```
+
+Start the API from either the repository root or `backend/`:
+
+```bash
+uv run --locked --all-packages --all-groups python -m uvicorn kernel_backend.api:app
+```
+
+Run backend tests from the repository root:
+
+```bash
+uv run --locked --all-packages --all-groups python -m pytest -c backend/pyproject.toml backend/tests -v -ra
+```
+
+Or from `backend/`:
+
+```bash
+uv run --locked --all-packages --all-groups python -m pytest -v -ra
+```
+
+- The API currently uses the standard Transformers model loader. Eventually we will
+serve quantized Qwen through the API using the custom CUDA linear backend.
+- That implementation and integration are separate from this individual packaging change.
+- See the [root README](../README.md) for workspace and quant validation commands.

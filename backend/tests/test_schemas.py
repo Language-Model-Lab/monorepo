@@ -1,4 +1,4 @@
-from schemas import (
+from kernel_backend.schemas import (
 GenerationSettings,
 InterventionSettings,
 GenerateRequest,

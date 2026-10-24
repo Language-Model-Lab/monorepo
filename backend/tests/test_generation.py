@@ -1,4 +1,4 @@
-from schemas import (
+from kernel_backend.schemas import (
 GenerationSettings,
 InterventionSettings,
 GenerateRequest,
@@ -14,7 +14,7 @@ from transformers import (
     StoppingCriteriaList
     )
 import torch
-import generation
+from kernel_backend import generation
 from unittest.mock import MagicMock
 import pytest
 
