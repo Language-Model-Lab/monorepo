@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+
+#Pytest
+.pytest_cache/
+
+# Python build artifacts
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# Model/cache files
+.cache/
+huggingface/
+models/
+checkpoints/
+
+# Large ML artifacts
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.safetensors
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+#generated
+*.egg-info/
+
+#local experiment results
+/quant/results/

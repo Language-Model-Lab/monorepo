@@ -1,0 +1,33 @@
+[project]
+name = "quant"
+version = "0.1.0"
+description = "Weight-only quantization and CUDA GEMV kernels for Qwen3-0.6B"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "datasets>=4.0",
+    "ninja>=1.13.2",
+    "nvidia-ml-py>=13.615.71",
+    "torch==2.14.1",
+    "transformers==5.18.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "model: needs the real Qwen3-0.6B checkpoint and a CUDA GPU (run with -m model)",
+    "gpu: needs a CUDA GPU and may build a CUDA extension (run with -m gpu)",
+]
+addopts = "-m 'not model and not gpu'"

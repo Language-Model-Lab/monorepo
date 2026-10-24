@@ -1,0 +1,10 @@
+[
+  {"id": "capital", "text": "What is the capital of France?"},
+  {"id": "arithmetic", "text": "What is 17 multiplied by 23? Show your steps."},
+  {"id": "code", "text": "Write a Python function that reverses a singly linked list."},
+  {"id": "instruction", "text": "List three fruits that are red, one per line, with no other text."},
+  {"id": "explanation", "text": "Explain how a refrigerator keeps food cold."},
+  {"id": "summary", "text": "Summarize the plot of Romeo and Juliet in two sentences."},
+  {"id": "translation", "text": "Translate 'The weather is nice today' into Spanish and French."},
+  {"id": "reasoning", "text": "A train leaves at 3:15 pm and the trip takes 2 hours 50 minutes. When does it arrive?"}
+]

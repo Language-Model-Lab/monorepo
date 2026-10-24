@@ -1,0 +1,14 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "Backend for language model experimental lab"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "accelerate>=1.15.0",
+    "fastapi[standard]>=0.142.2",
+    "pydantic>=2.13.5",
+    "pytest>=9.1.1",
+    "torch>=2.14.1",
+    "transformers>=5.18.0",
+]
