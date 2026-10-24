@@ -2,9 +2,9 @@ import time
 startup_start = time.perf_counter()
 
 from fastapi import FastAPI
-from schemas import GenerateRequest, GenerateResponse
-from model import load_model
-from generation import generate_text, run_generation
+from kernel_backend.schemas import GenerateRequest, GenerateResponse
+from kernel_backend.model import load_model
+from kernel_backend.generation import generate_text, run_generation
 
 app = FastAPI()
 

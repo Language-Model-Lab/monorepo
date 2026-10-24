@@ -1,10 +1,8 @@
 import json
-from pathlib import Path
+from importlib.resources import files
 
 import torch
 from datasets import load_dataset
-
-PROMPTS_FILE = Path(__file__).resolve().parents[2] / "prompts.json"
 
 
 #WikiText-2 raw text, the dataset is joined like the standard HF perplexity recipe.
@@ -20,7 +18,7 @@ def tokenize_corpus(tokenizer, text: str) -> torch.Tensor:
 
 #The form of the fixed prompt set resembles: [{"id": ..., "text": ...}, ...].
 def load_prompts() -> list[dict]:
-    return json.loads(PROMPTS_FILE.read_text())
+    return json.loads(files("quant").joinpath("prompts.json").read_text(encoding="utf-8"))
 
 
 #Single turn chat prompt with the thinking mode hard switch: {"input_ids", "attention_mask"}.

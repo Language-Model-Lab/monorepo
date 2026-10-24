@@ -23,6 +23,10 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+namespaces = false
+
+[tool.setuptools.package-data]
+quant = ["prompts.json", "csrc/*.cu", "csrc/*.cpp", "csrc/*.h", "csrc/*.cuh"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,25 +1,25 @@
-"""JIT builds of the CUDA sources in quant/csrc ."""
+"""JIT builds from CUDA sources bundled with the quant package."""
 
 import os
 from functools import cache
-from pathlib import Path
+from importlib.resources import as_file, files
 
 from torch.utils.cpp_extension import load
-
-CSRC = Path(__file__).resolve().parents[2] / "csrc"
-
 
 @cache
 def load_extension(name: str, sources: tuple[str, ...]):
     # Build for the target architecture only: shorter builds, unambiguous SASS for Nsight Compute.
     os.environ.setdefault("TORCH_CUDA_ARCH_LIST", "8.9")
-    return load(
-        name=name,
-        sources=[str(CSRC / s) for s in sources],
-        extra_cflags=["-O3"],
-        extra_cuda_cflags=["-O3", "-lineinfo"],
-        verbose=False,
-    )
+    # Keep the entire source directory available until compilation finishes,
+    # including when resources need extraction from an archive.
+    with as_file(files("quant").joinpath("csrc")) as csrc:
+        return load(
+            name=name,
+            sources=[str(csrc / s) for s in sources],
+            extra_cflags=["-O3"],
+            extra_cuda_cflags=["-O3", "-lineinfo"],
+            verbose=False,
+        )
 
 
 def bandwidth_ext():

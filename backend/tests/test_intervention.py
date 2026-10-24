@@ -1,4 +1,4 @@
-import interventions
+from kernel_backend import interventions
 import pytest
 from unittest.mock import MagicMock
 import torch

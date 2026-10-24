@@ -1,4 +1,4 @@
-from interventions import add_head_ablation, add_mlp_ablation
+from kernel_backend.interventions import add_head_ablation, add_mlp_ablation
 import torch
 from transformers import (
     AutoTokenizer, 
@@ -6,7 +6,7 @@ from transformers import (
     StoppingCriteria, 
     StoppingCriteriaList
     )
-from schemas import (
+from kernel_backend.schemas import (
    GenerationSettings,
    InterventionSettings,
    GenerateRequest,
