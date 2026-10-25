@@ -10,13 +10,14 @@ it to quant's quantized inference path is a also an integration step.
 
 ## Repository layout
 
-| `Path`:  Role |
-| `backend/`: API, generation settings, model loading, and attention/MLP interventions |
-| `quant/`: Quantization library, CUDA sources, fidelity checks, and benchmark scripts |
-| `notebooks/`: Exploratory model and intervention notebooks |
-| `documentation/`: Independent baselines and shared workspace validation records |
-| `pyproject.toml`: Workspace membership |
-| `uv.lock`: Shared, reproducible dependency resolution; commit changes to this file |
+| Path | Role |
+|---|---|
+| `backend/` | API, generation settings, model loading, and attention/MLP interventions |
+| `quant/` | Quantization library, CUDA sources, fidelity checks, and benchmark scripts |
+| `notebooks/` | Exploratory model and intervention notebooks |
+| `documentation/` | Progress reports, meeting notes, mockups, abstracts, and shared project documentation |
+| `pyproject.toml` | Workspace membership |
+| `uv.lock` | Shared, reproducible dependency resolution; commit changes to this file |
 
 ## Set up the shared environment
 
