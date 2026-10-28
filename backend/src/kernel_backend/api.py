@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
 from kernel_backend.errors import InvalidLayerError, InvalidHeadError
 from kernel_backend.schemas import GenerateRequest, GenerateResponse
@@ -6,6 +7,16 @@ from kernel_backend.model import load_model
 from kernel_backend.generation import generate_text, run_generation
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+    ],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 #Load model only once when backend is started
 model, tokenizer = load_model("Qwen/Qwen3-0.6B")
