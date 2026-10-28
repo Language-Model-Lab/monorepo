@@ -191,6 +191,8 @@ def test_valid_response():
         condition_b_text= "asdkasod2ed",
         condition_a_latency_ms= 2.32,
         condition_b_latency_ms= 3.32,
+        condition_a_tokens_per_second= 1.2,
+        condition_b_tokens_per_second= 1.2,
     )
 
     assert response.condition_a_text == "paodpasodsd"
@@ -259,6 +261,8 @@ def test_response_extra_fields():
             condition_b_text= "asdkasod2ed",
             condition_a_latency_ms= 2.32,
             condition_b_latency_ms= 3.32,
+            condition_a_tokens_per_second= 1.2,
+            condition_b_tokens_per_second= 1.3,
             extra_field=23,
         )
 

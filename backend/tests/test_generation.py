@@ -13,6 +13,7 @@ from transformers import (
     StoppingCriteria, 
     StoppingCriteriaList
     )
+from kernel_backend.generation import GenerationResult
 import torch
 from kernel_backend import generation
 from unittest.mock import MagicMock
@@ -72,9 +73,14 @@ def test_run_generation_no_intervention(monkeypatch):
     request = ExperimentConfiguration(generation=generation_settings)
 
     handle = MagicMock()
-
+    
     def fake_generate_text(model, tokenizer, prompt, settings):
-        return "fake response"
+        return GenerationResult(
+            generated_text="fake response",
+            latency_ms=100.0,
+            num_generated_tokens=20,
+            tokens_per_second=200.0,
+        )
 
     monkeypatch.setattr(
         generation,
@@ -89,7 +95,10 @@ def test_run_generation_no_intervention(monkeypatch):
                         request=request
                         )
 
-    assert model_response == "fake response"
+    assert model_response.generated_text == "fake response"
+    assert model_response.latency_ms == 100.0
+    assert model_response.num_generated_tokens == 20
+    assert model_response.tokens_per_second == 200.0
 
 def test_run_generation_mlp_intervention(monkeypatch):
     model = MagicMock()
@@ -112,7 +121,12 @@ def test_run_generation_mlp_intervention(monkeypatch):
         return handle, None, layer_idx, proportion
 
     def fake_generate_text(model, tokenizer, prompt, settings):
-        return "fake response"
+        return GenerationResult(
+            generated_text="fake response",
+            latency_ms=100.0,
+            num_generated_tokens=20,
+            tokens_per_second=200.0,
+        )
 
     monkeypatch.setattr(
         generation,
@@ -155,7 +169,12 @@ def test_run_generation_attention_intervention(monkeypatch):
         return handle, head_indices, layer_idx
 
     def fake_generate_text(model, tokenizer, prompt, settings):
-        return "fake response"
+        return GenerationResult(
+            generated_text="fake response",
+            latency_ms=100.0,
+            num_generated_tokens=20,
+            tokens_per_second=200.0,
+        )
 
     monkeypatch.setattr(
         generation,

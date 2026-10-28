@@ -18,12 +18,14 @@ def generate(request:GenerateRequest):
     prompt = request.prompt
     configuration_a = request.configuration_a
     configuration_b = request.configuration_b
-    generated_text_a = run_generation(model, tokenizer, prompt, configuration_a)
-    generated_text_b = run_generation(model, tokenizer, prompt, configuration_b)
+    result_a = run_generation(model, tokenizer, prompt, configuration_a)
+    result_b = run_generation(model, tokenizer, prompt, configuration_b)
 
     return GenerateResponse(
-        condition_a_text= generated_text_a,
-        condition_b_text= generated_text_b,
-        condition_a_latency_ms=3.33,
-        condition_b_latency_ms=123.123,
+        condition_a_text = result_a.generated_text,
+        condition_b_text = result_b.generated_text,
+        condition_a_latency_ms = result_a.latency_ms,
+        condition_b_latency_ms = result_b.latency_ms,
+        condition_a_tokens_per_second = result_a.tokens_per_second,
+        condition_b_tokens_per_second = result_b.tokens_per_second,
     )
