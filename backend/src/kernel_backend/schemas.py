@@ -7,8 +7,12 @@ class StrictModel(BaseModel):
 class GenerateResponse(StrictModel):   
     condition_a_text: str
     condition_b_text: str
+
     condition_a_latency_ms: float
     condition_b_latency_ms: float
+    
+    condition_a_tokens_per_second: float
+    condition_b_tokens_per_second: float
 
 class GenerateRequest(StrictModel):
     prompt: str = Field(min_length = 1, max_length=2000)

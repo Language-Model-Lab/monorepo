@@ -1,5 +1,7 @@
 from kernel_backend.interventions import add_head_ablation, add_mlp_ablation
 import torch
+import time
+from dataclasses import dataclass
 from transformers import (
     AutoTokenizer, 
     AutoModelForCausalLM, 
@@ -13,6 +15,13 @@ from kernel_backend.schemas import (
    GenerateResponse,
    ExperimentConfiguration
    )
+
+@dataclass
+class GenerationResult:
+    generated_text: str
+    latency_ms: float
+    num_generated_tokens: int
+    tokens_per_second: float 
 
 class SentenceBoundaryCriteria(StoppingCriteria):
     def __init__(self, tokenizer, prompt_length, soft_limit):
@@ -40,8 +49,7 @@ class SentenceBoundaryCriteria(StoppingCriteria):
                 device=input_ids.device,
                 )
 
-
-def run_generation(model, tokenizer, prompt: str, request:ExperimentConfiguration):
+def run_generation(model, tokenizer, prompt: str, request:ExperimentConfiguration) -> GenerationResult:
     generation_settings = request.generation
     intervention_settings = request.intervention
     handles = []
@@ -79,9 +87,7 @@ def run_generation(model, tokenizer, prompt: str, request:ExperimentConfiguratio
     return model_response
     
 
-    
-
-def generate_text(model, tokenizer, prompt:str, settings: GenerationSettings) -> str:
+def generate_text(model, tokenizer, prompt:str, settings: GenerationSettings) -> GenerationResult:
     messages = [
     {"role": "user", "content": prompt},
     ]
@@ -95,6 +101,8 @@ def generate_text(model, tokenizer, prompt:str, settings: GenerationSettings) ->
         enable_thinking=settings.enable_thinking,
     ).to(model.device)
 
+    prompt_length = inputs["input_ids"].shape[-1]
+
     #Absolute maximum amount of new tokens the model 
     #is allowed to generate.
     hard_limit = int(settings.max_new_tokens*1.25)
@@ -103,7 +111,7 @@ def generate_text(model, tokenizer, prompt:str, settings: GenerationSettings) ->
     #more natural points in sentences, rather than mid-sentence.
     criteria = SentenceBoundaryCriteria(
             tokenizer=tokenizer, 
-            prompt_length=inputs["input_ids"].shape[-1],
+            prompt_length=prompt_length,
             soft_limit=settings.max_new_tokens
             )
 
@@ -119,15 +127,38 @@ def generate_text(model, tokenizer, prompt:str, settings: GenerationSettings) ->
         generation_kwargs["top_k"] = settings.top_k
         generation_kwargs["top_p"] = settings.top_p
     
+    ### Generate metrics and output text ###
+    device = inputs["input_ids"].device
+
+    if device.type == "cuda":
+        torch.cuda.synchronize(device)
+
+    start = time.perf_counter()
+
     output = model.generate(
         **inputs,
         **generation_kwargs,
         )
 
-    return tokenizer.decode(
-            output[0][inputs["input_ids"].shape[-1]:], 
-            skip_special_tokens=True
-            )
+    if device.type == "cuda":
+        torch.cuda.synchronize(device)
+
+    elapsed_seconds = time.perf_counter() - start
+    generated_ids = output[0][prompt_length:]
+    num_generated_tokens = generated_ids.shape[-1]
+    tokens_per_second = num_generated_tokens / elapsed_seconds
+
+    generated_text = tokenizer.decode(
+                generated_ids, 
+                skip_special_tokens=True
+                ) 
+
+    return GenerationResult(
+        generated_text=generated_text,
+        latency_ms=elapsed_seconds*1000,
+        num_generated_tokens=num_generated_tokens,
+        tokens_per_second=tokens_per_second
+    )
 
 
      
