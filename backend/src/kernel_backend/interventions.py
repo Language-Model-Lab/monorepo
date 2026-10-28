@@ -1,4 +1,5 @@
 import torch
+from kernel_backend.errors import InvalidLayerError, InvalidHeadError
 
 def add_head_ablation(model, head_indices: list[int], layer_idx: int):
     #Number of hidden layers
@@ -7,10 +8,16 @@ def add_head_ablation(model, head_indices: list[int], layer_idx: int):
     num_heads = model.config.num_attention_heads
 
     if not 0 <= layer_idx < num_layers:
-        raise ValueError(f"layer_idx must be between 0 and {num_layers - 1}")
+        raise InvalidLayerError(
+            f"Layer index {layer_idx} is invalid. "
+            f"Valid range is 0-{num_layers - 1}."
+            )
     for head_idx in head_indices:
         if not 0 <= head_idx < num_heads:
-            raise ValueError(f"head_idx must be between 0 and {num_heads - 1}")
+            raise InvalidHeadError(
+                f"Attention head {head_idx} is invalid. "
+                f"Valid range is 0-{num_heads - 1}."
+                )
 
     #Projection dimension per attention head
     head_dim = model.model.layers[layer_idx].self_attn.head_dim
@@ -42,7 +49,10 @@ def add_mlp_ablation(model, layer_idx: int, proportion: float, seed: int=42):
     num_layers = model.config.num_hidden_layers
 
     if not 0 <= layer_idx < num_layers:
-        raise ValueError(f"layer_idx must be between 0 and {num_layers - 1}")
+        raise InvalidLayerError(
+            f"Layer index {layer_idx} is invalid. "
+            f"Valid range is 0-{num_layers - 1}."
+            )
     
     if not 0 <= proportion <= 1.0:
         raise ValueError(f"proportion must be between 0 and 1")

@@ -1,4 +1,5 @@
 from kernel_backend import interventions
+from kernel_backend.errors import InvalidLayerError, InvalidHeadError
 import pytest
 from unittest.mock import MagicMock
 import torch
@@ -97,6 +98,23 @@ def test_mlp_ablation():
     assert torch.equal(modified[..., mask], x[..., mask])
 
     
+def test_head_ablation_invalid_head():
+    model = TinyModel()
 
+    with pytest.raises(InvalidHeadError):
+        handle, head_indices, layer_idx = interventions.add_head_ablation(
+                                                    model=model, 
+                                                    head_indices= [999], 
+                                                    layer_idx= 0)
+
+def test_mlp_ablation_invalid_layer():
+    model = TinyModel()
+
+    with pytest.raises(InvalidLayerError):
+        handle, indices, layer_idx, proportion = interventions.add_mlp_ablation(
+                                                model=model, 
+                                                layer_idx=999, 
+                                                proportion=0.5, 
+                                                )
 
 

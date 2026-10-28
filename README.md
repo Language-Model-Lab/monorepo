@@ -60,8 +60,6 @@ Allow sufficient memory for the model. Device placement is selected automaticall
 
 - Backend is installed as the `kernel_backend` Python package, so this entry point
 also works from `backend/`. Importing the API still loads the model immediately.
-The response latency fields currently contain placeholder values and should not
-be used as benchmark measurements.
 
 ## Run tests
 
@@ -78,7 +76,7 @@ uv run --locked --all-packages --all-groups python -m pytest -c backend/pyprojec
 From `backend/`, use `uv run --locked --all-packages --all-groups python -m pytest -v -ra`.
 
 - Validates schemas, generation helpers, and interventions. The migration baseline
-is **29 passed**. This suite does not validate server startup or real-model API
+is **31 passed**. This suite does not validate server startup or real-model API
 inference.
 
 ### Quant CPU
