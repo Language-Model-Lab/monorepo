@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
 from kernel_backend.errors import InvalidLayerError, InvalidHeadError
-from kernel_backend.schemas import GenerateRequest, GenerateResponse
+from kernel_backend.schemas import GenerateRequest, GenerateResponse, GenerationError, GenerationSuccess
 from kernel_backend.model import load_model
 from kernel_backend.generation import generate_text, run_generation
 import threading
@@ -32,18 +32,33 @@ def generate(request:GenerateRequest):
     configuration_a = request.configuration_a
     configuration_b = request.configuration_b
 
-    
     #### START LOCK HERE #####
     with generation_lock:
         #Generate text using first configuration
         try:
             result_a = run_generation(model, tokenizer, prompt, configuration_a)
 
-        except (InvalidLayerError, InvalidHeadError) as exc:
-            raise HTTPException(
-                status_code=422,
-                detail=f"Configuration A: {exc}",
-            ) from exc
+            response_a = GenerationSuccess(
+                state = "success",
+                text = result_a.generated_text,
+                latency_ms= result_a.latency_ms,
+                num_generated_tokens = result_a.num_generated_tokens,
+                tokens_per_second = result_a.tokens_per_second
+                )
+
+        except InvalidLayerError as exc:
+            response_a = GenerationError(
+                state = "error",
+                error_type = "invalid_layer",
+                message = str(exc)
+                )
+        
+        except InvalidHeadError as exc:
+            response_a = GenerationError(
+                state = "error",
+                error_type = "invalid_head",
+                message = str(exc)
+                )
 
         except RuntimeError as exc:
             raise HTTPException(
@@ -55,11 +70,27 @@ def generate(request:GenerateRequest):
         try:
             result_b = run_generation(model, tokenizer, prompt, configuration_b)
 
-        except (InvalidLayerError, InvalidHeadError) as exc:
-            raise HTTPException(
-                status_code=422,
-                detail=f"Configuration B: {exc}",
-            ) from exc
+            response_b = GenerationSuccess(
+                state = "success",
+                text = result_b.generated_text,
+                latency_ms= result_b.latency_ms,
+                num_generated_tokens = result_b.num_generated_tokens,
+                tokens_per_second = result_b.tokens_per_second
+                )
+
+        except InvalidLayerError as exc:
+            response_b = GenerationError(
+                state = "error",
+                error_type = "invalid_layer",
+                message = str(exc)
+                )
+        
+        except InvalidHeadError as exc:
+            response_b = GenerationError(
+                state = "error",
+                error_type = "invalid_head",
+                message = str(exc)
+                )
 
         except RuntimeError as exc:
             raise HTTPException(
@@ -69,10 +100,6 @@ def generate(request:GenerateRequest):
     #### RELEASE LOCK HERE #####
 
     return GenerateResponse(
-        condition_a_text = result_a.generated_text,
-        condition_b_text = result_b.generated_text,
-        condition_a_latency_ms = result_a.latency_ms,
-        condition_b_latency_ms = result_b.latency_ms,
-        condition_a_tokens_per_second = result_a.tokens_per_second,
-        condition_b_tokens_per_second = result_b.tokens_per_second,
+        condition_a = response_a,
+        condition_b = response_b,
     )

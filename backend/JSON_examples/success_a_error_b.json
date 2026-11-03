@@ -1,0 +1,14 @@
+{
+  "condition_a": {
+    "state": "success",
+    "text": "The question \"What is best in life?\" is subjective and depends on individual values, beliefs, and experiences. However, many people find that **purpose** or **meaning** is central to their lives. Here are some common perspectives:\n\n1. **Purpose**: Finding meaning through personal growth, relationships, or contributing",
+    "latency_ms": 13952.850472000137,
+    "num_generated_tokens": 62,
+    "tokens_per_second": 4.443536474816986
+  },
+  "condition_b": {
+    "state": "error",
+    "error_type": "invalid_layer",
+    "message": "Layer index 99 is invalid. Valid range is 0-27."
+  }
+}

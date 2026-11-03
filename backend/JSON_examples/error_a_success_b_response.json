@@ -1,0 +1,14 @@
+{
+  "condition_a": {
+    "state": "error",
+    "error_type": "invalid_head",
+    "message": "Attention head 99 is invalid. Valid range is 0-15."
+  },
+  "condition_b": {
+    "state": "success",
+    "text": "<think>\nOkay, the user asked, \"What is best in life?\" Hmm. First, I need to consider different perspectives here. The question seems open-ended, so maybe they want a general answer or perhaps they're looking for something specific.\n\nI should start by acknowledging that there's no single answer because life",
+    "latency_ms": 27873.119773001235,
+    "num_generated_tokens": 62,
+    "tokens_per_second": 2.2243652847233526
+  }
+}

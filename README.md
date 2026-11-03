@@ -75,7 +75,7 @@ uv run --locked --all-packages --all-groups python -m pytest -c backend/pyprojec
 
 From `backend/`, use `uv run --locked --all-packages --all-groups python -m pytest -v -ra`.
 
-- Validates schemas, generation helpers, intervention function, and API endpoint behavior. The migration baseline is **33 passed**. This suite validates API endpoints using mocked model loading and generation, but does not validate production server startup or real-model API inference.
+- Validates schemas, generation helpers, intervention function, and API endpoint behavior. The migration baseline is **35 passed**. This suite validates API endpoints using mocked model loading and generation, but does not validate production server startup or real-model API inference.
 
 ### Quant CPU
 
