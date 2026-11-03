@@ -1,0 +1,16 @@
+{
+  "condition_a": {
+    "state": "success",
+    "text": "The question \"What is best in life?\" is subjective and depends on individual values, beliefs, and experiences. However, many people find that **purpose** or **meaning** is central to their lives. Here are some common perspectives:\n\n1. **Purpose**: Finding meaning through personal growth, relationships, or contributing",
+    "latency_ms": 29915.4075309998,
+    "num_generated_tokens": 62,
+    "tokens_per_second": 2.0725106263637754
+  },
+  "condition_b": {
+    "state": "success",
+    "text": "<think>\nOkay, the user asked, \"What is best in life?\" Hmm. First, I need to consider different perspectives here. The question seems open-ended, so maybe they want a general answer or perhaps they're looking for something specific.\n\nI should start by acknowledging that there's no single answer because life is subjective. But then, maybe I can list some common values or principles people often emphasize. For example, happiness, personal growth, family, and community come to mind. \n\nWait, but how do I structure this?",
+    "latency_ms": 23530.131732000882,
+    "num_generated_tokens": 107,
+    "tokens_per_second": 4.547360857078434
+  }
+}

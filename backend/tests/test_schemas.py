@@ -1,4 +1,6 @@
 from kernel_backend.schemas import (
+GenerationSuccess,
+GenerationError,
 GenerationSettings,
 InterventionSettings,
 GenerateRequest,
@@ -185,31 +187,70 @@ def test_invalid_request_no_prompt():
             ),
         )
 
-def test_valid_response():
+def test_valid_successful_response():
+    success_a = GenerationSuccess(
+        state = "success",
+        text = "result a",
+        latency_ms = 123.123,
+        num_generated_tokens = 111,
+        tokens_per_second = 321.321
+        )
+    success_b = GenerationSuccess(
+        state = "success",
+        text = "result b",
+        latency_ms = 456.456,
+        num_generated_tokens = 222,
+        tokens_per_second = 654.654
+        )
     response = GenerateResponse(
-        condition_a_text= "paodpasodsd",
-        condition_b_text= "asdkasod2ed",
-        condition_a_latency_ms= 2.32,
-        condition_b_latency_ms= 3.32,
-        condition_a_tokens_per_second= 1.2,
-        condition_b_tokens_per_second= 1.2,
+        condition_a = success_a,
+        condition_b = success_b,
     )
 
-    assert response.condition_a_text == "paodpasodsd"
-    assert response.condition_b_text == "asdkasod2ed"
-    assert response.condition_a_latency_ms == 2.32
-    assert response.condition_b_latency_ms == 3.32
+    assert response.condition_a.state == "success"
+    assert response.condition_b.state == "success"
+    assert response.condition_a.text == "result a"
+    assert response.condition_b.text == "result b"
+    assert response.condition_a.latency_ms == 123.123
+    assert response.condition_b.latency_ms == 456.456
+    assert response.condition_a.num_generated_tokens == 111
+    assert response.condition_b.num_generated_tokens == 222
+    assert response.condition_a.tokens_per_second == 321.321
+    assert response.condition_b.tokens_per_second == 654.654
+
+def test_error_response():
+    error_a = GenerationError(
+        state = "error",
+        error_type = "error type 1",
+        message = "error a"
+        )
+    error_b = GenerationError(
+        state = "error",
+        error_type = "error type 2",
+        message = "error b"
+        )
+    response = GenerateResponse(
+        condition_a = error_a,
+        condition_b = error_b,
+    )
+
+    assert response.condition_a.state == "error"
+    assert response.condition_b.state == "error"
+    assert response.condition_a.error_type == "error type 1"
+    assert response.condition_b.error_type == "error type 2"
+    assert response.condition_a.message == "error a"
+    assert response.condition_b.message == "error b"
 
 def test_generation_settings_extra_fields():
     with pytest.raises(ValidationError):
         GenerationSettings(
-        max_new_tokens=75, 
-        temperature=0.5, 
-        top_k=22, 
-        top_p=0.5, 
-        repetition_penalty=1.3,
-        extra_field = 22,
-        )
+            max_new_tokens=75, 
+            temperature=0.5, 
+            top_k=22, 
+            top_p=0.5, 
+            repetition_penalty=1.3,
+            extra_field = 22,
+            )
 
 def test_MLP_intervention_settings_extra_fields():
     with pytest.raises(ValidationError):
@@ -254,17 +295,16 @@ def test_request_extra_fields():
             extra_field=25,
             )
 
-def test_response_extra_fields():
+def test_success_response_extra_fields():
     with pytest.raises(ValidationError):
-        GenerateResponse(
-            condition_a_text= "paodpasodsd",
-            condition_b_text= "asdkasod2ed",
-            condition_a_latency_ms= 2.32,
-            condition_b_latency_ms= 3.32,
-            condition_a_tokens_per_second= 1.2,
-            condition_b_tokens_per_second= 1.3,
-            extra_field=23,
-        )
+        GenerationSuccess(
+            state = "success",
+            text = "result a",
+            latency_ms = 123.123,
+            num_generated_tokens = 111,
+            tokens_per_second = 321.321,
+            extra_field=23
+            )
 
 def test_MLP_intervention_discriminator():
     settings = GenerationSettings(

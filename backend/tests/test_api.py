@@ -13,6 +13,7 @@ from transformers import (
     StoppingCriteria, 
     StoppingCriteriaList
     )
+from kernel_backend.errors import InvalidLayerError, InvalidHeadError
 from kernel_backend.generation import GenerationResult
 import torch
 from kernel_backend import generation
@@ -63,8 +64,8 @@ def test_api_generation(monkeypatch):
 
     assert response.status_code == 200
     data = response.json()
-    assert data["condition_a_text"] == 'fake response'
-    assert data["condition_b_text"] == 'fake response'
+    assert data["condition_a"]["text"] == 'fake response'
+    assert data["condition_b"]["text"] == 'fake response'
 
 def test_concurrent_api_generation(monkeypatch):
     def fake_load_model(model_name: str, device_map: str = "auto"):
@@ -138,3 +139,53 @@ def test_concurrent_api_generation(monkeypatch):
         ["1", "1", "2", "2"],
         ["2", "2", "1", "1"],
     ]
+
+def test_mixed_success_api_generation(monkeypatch):
+    def fake_load_model(model_name: str, device_map: str = "auto"):
+        model = MagicMock()
+        tokenizer = MagicMock()
+        return model, tokenizer
+
+    monkeypatch.setattr(
+        model_module,
+        "load_model",
+        fake_load_model,
+    )
+
+    generation_settings = GenerationSettings()
+    request = ExperimentConfiguration(
+            generation=generation_settings,
+        )
+    
+    num_call = 0
+    def fake_run_generation(model, tokenizer, prompt, request):
+        nonlocal num_call
+        num_call += 1
+        if num_call == 1:
+            raise InvalidHeadError("Invalid head")
+        else:
+            return GenerationResult(
+                generated_text="fake response",
+                latency_ms=100.0,
+                num_generated_tokens=20,
+                tokens_per_second=200.0,
+            )
+    
+    from kernel_backend import api
+
+    monkeypatch.setattr(api, "run_generation", fake_run_generation)
+    client = TestClient(api.app)
+
+    response = client.post(
+        "/generate",
+        json={
+            "prompt": "test",
+            "configuration_a": request.model_dump(),
+            "configuration_b": request.model_dump(),
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["condition_a"]["state"] == 'error'
+    assert data["condition_b"]["state"] == 'success'
