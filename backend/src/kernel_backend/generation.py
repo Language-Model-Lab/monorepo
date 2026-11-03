@@ -77,6 +77,7 @@ def run_generation(model, tokenizer, prompt: str, request:ExperimentConfiguratio
         model_response = generate_text(
                                 model=model, 
                                 tokenizer=tokenizer,
+                                system_prompt=request.system_prompt,
                                 prompt=prompt, 
                                 settings=generation_settings
                                 )
@@ -87,10 +88,11 @@ def run_generation(model, tokenizer, prompt: str, request:ExperimentConfiguratio
     return model_response
     
 
-def generate_text(model, tokenizer, prompt:str, settings: GenerationSettings) -> GenerationResult:
-    messages = [
-    {"role": "user", "content": prompt},
-    ]
+def generate_text(model, tokenizer, system_prompt:str|None, prompt:str, settings: GenerationSettings) -> GenerationResult:
+    messages = []
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
+    messages.append({"role": "user", "content": prompt})
 
     inputs = tokenizer.apply_chat_template(
         messages,

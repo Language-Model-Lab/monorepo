@@ -27,6 +27,7 @@ class GenerateRequest(StrictModel):
 
 class ExperimentConfiguration(StrictModel):
     generation: GenerationSettings
+    system_prompt: str | None = Field(default=None, max_length=500)
     intervention: InterventionSettings | None = None
     
 class GenerationSettings(StrictModel):
