@@ -5,6 +5,7 @@ from kernel_backend.errors import InvalidLayerError, InvalidHeadError
 from kernel_backend.schemas import GenerateRequest, GenerateResponse
 from kernel_backend.model import load_model
 from kernel_backend.generation import generate_text, run_generation
+import threading
 
 app = FastAPI()
 
@@ -18,6 +19,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+#Concurrency management lock
+generation_lock = threading.Lock()
+
 #Load model only once when backend is started
 model, tokenizer = load_model("Qwen/Qwen3-0.6B")
 
@@ -28,37 +32,41 @@ def generate(request:GenerateRequest):
     configuration_a = request.configuration_a
     configuration_b = request.configuration_b
 
-    #Generate text using first configuration
-    try:
-        result_a = run_generation(model, tokenizer, prompt, configuration_a)
-
-    except (InvalidLayerError, InvalidHeadError) as exc:
-        raise HTTPException(
-            status_code=422,
-            detail=f"Configuration A: {exc}",
-        ) from exc
-
-    except RuntimeError as exc:
-        raise HTTPException(
-            status_code=500,
-            detail="Configuration A: model generation failed.",
-        ) from exc
     
-    #Generate text using second configuration
-    try:
-        result_b = run_generation(model, tokenizer, prompt, configuration_b)
+    #### START LOCK HERE #####
+    with generation_lock:
+        #Generate text using first configuration
+        try:
+            result_a = run_generation(model, tokenizer, prompt, configuration_a)
 
-    except (InvalidLayerError, InvalidHeadError) as exc:
-        raise HTTPException(
-            status_code=422,
-            detail=f"Configuration B: {exc}",
-        ) from exc
+        except (InvalidLayerError, InvalidHeadError) as exc:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Configuration A: {exc}",
+            ) from exc
 
-    except RuntimeError as exc:
-        raise HTTPException(
-            status_code=500,
-            detail="Configuration B: model generation failed.",
-        ) from exc
+        except RuntimeError as exc:
+            raise HTTPException(
+                status_code=500,
+                detail="Configuration A: model generation failed.",
+            ) from exc
+        
+        #Generate text using second configuration
+        try:
+            result_b = run_generation(model, tokenizer, prompt, configuration_b)
+
+        except (InvalidLayerError, InvalidHeadError) as exc:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Configuration B: {exc}",
+            ) from exc
+
+        except RuntimeError as exc:
+            raise HTTPException(
+                status_code=500,
+                detail="Configuration B: model generation failed.",
+            ) from exc
+    #### RELEASE LOCK HERE #####
 
     return GenerateResponse(
         condition_a_text = result_a.generated_text,
