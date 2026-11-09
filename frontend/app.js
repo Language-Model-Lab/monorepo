@@ -561,10 +561,10 @@ run.addEventListener("click", async function(){
             return;
         }
 
-        document.getElementById("model-1-text").textContent = data.condition_a_text;
-        document.getElementById("model-2-text").textContent = data.condition_b_text;
-        document.getElementById("condition-a-latency").textContent = data.condition_a_latency_ms + " ms";
-        document.getElementById("condition-b-latency").textContent = data.condition_b_latency_ms + " ms";
+        document.getElementById("model-1-text").textContent = data.condition_a.text;
+        document.getElementById("model-2-text").textContent = data.condition_b.text;
+        document.getElementById("condition-a-latency").textContent = data.condition_a.latency_ms + " ms";
+        document.getElementById("condition-b-latency").textContent = data.condition_b.latency_ms + " ms";
     } catch (error) {
         console.error(error);
         document.getElementById("model-1-text").textContent = "Could not reach the backend.";
