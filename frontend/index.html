@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> LLM 👻</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>   
+    <script src="app.js" defer></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!------------ TOP BAR ------------>
+    <div id="top-bar">
+        <div class="horizontal-container">
+            <h1>Pre Trained Fast Lab</h1>
+            <p>Qwen3-0.6B · RTX 4050 Laptop</p>
+        </div>
+
+        <div class="horizontal-container">
+            <h2>Compare</h2>
+            <h2>How quantization works</h2>
+            <h2>Why it's faster</h2>
+            <h2>Results</h2>
+        </div>
+        <p>● Live model online</p>
+    </div>
+
+    <!------------ LEFT SIDE ------------>
+    <div id="left-side">
+
+        <!------------ PROMPT ------------>
+        <div id="prompt">
+            <p> Prompt: </p>
+            <input type="text" id="prompt-input" name="prompt" value="Explain why the sky is blue in two sentences.">
+            <button type="submit" form="generate-form" class="dark-button" id="run">Run Comparison</button>
+        </div>
+
+        <!------------ SHARED ------------>
+        <div id="shared">
+            <p>Dont know how it works? Click Here: <button id="helpBtn"> Simple Tutorial</button> </p>
+        </div>
+
+        <!-- Your Main Tutorial Div (Hidden by default using styles or your existing setup) -->
+        <div id="tutorialWrapper" style="display: none;">
+            <div class="tutorial-card">
+                
+                <!-- Left Navigation Arrow -->
+                <button id="prevBtn" class="nav-arrow"><=</button>
+                
+                <!-- Central Display Window -->
+                <div class="display-window">
+                    <img id="tutorialImg" src="img/tutorial/tutorial1.png" alt="Tutorial Slide">
+                    <div id="stepText">Step 1 of 5</div>
+                </div>
+                
+                <!-- Right Navigation Arrow -->
+                <button id="nextBtn" class="nav-arrow">=></button>
+
+            </div>
+        </div>
+
+        <!------------ MODEL OPTION ------------>
+        <div class="model-option">
+            <button id="single-model">Single Model</button>
+            <button id="double-model">Double Model</button>
+            | 
+            <button id="system-prompt">System Prompt</button>
+        </div>
+        
+        <!------------ MODEL ------------>
+        <div class="horizontal-container">
+            <div id="model-1">
+                <div id="model-info-1" class="model-info">
+                    <h1>Model 1</h1>
+                    <div class="tooltip-container">
+                        ???
+                        <span class="tooltip-text">This box will give you the output when you run your prompt</span>
+                    </div>
+                    <p>16-bit · no ablation</p>
+                </div>
+                <p class="model-text" id="model-1-text">The sky looks blue because sunlight scatters off tiny gas molecules in the air. Shorter blue wavelengths scatter far more than red ones, so blue light reaches your eyes from every direction.</p>
+
+            </div>
+
+            <div id="model-2">
+                <div id="model-info-2" class="model-info">
+                    <h1>Model 2</h1>
+                    <div class="tooltip-container">
+                        ???
+                        <span class="tooltip-text">This box will give you the output when you run your prompt</span>
+                    </div>
+                    <p>INT8 · 4 heads off · zero ablation</p>
+                </div>
+                <p class="model-text" id="model-2-text">The sky looks blue because sunlight scatters off tiny gas molecules in the air. Shorter blue light is absorbed by the ozone layer, which reflects it back down across the whole sky.</p>
+            </div>
+        </div>
+
+        <!------------ SYSTEM PROMPT ------------>
+        <div id="system-prompt-display" class="horizontal-container">
+            <div>
+                <h1>System Prompt 1:</h1>
+                <input type="text" id="system-prompt1">
+            </div>
+            <div>
+                <h1>System Prompt 2:</h1>
+                <input type="text" id="system-prompt2">
+            </div>
+        </div>
+
+
+        <!------------ MODEL RESET BUTTON ------------>
+        <div class="horizontal-container" id="model-reset">
+        </div>
+
+        <!------------ INPUT INFO ------------>
+        <div class="word-info horizontal-container">
+            <div id="input-prompt-1">
+                <form class="generate-form">
+                    <h1>Configuration</h1>
+                    <label>
+                        <div class="tooltip-container">
+                            ?
+                            <span class="tooltip-text">The maximum token allowed to run this prompt [1 - 100]</span>
+                        </div>
+                        <h1>max_new_tokens: </h1><input type="number" step="1" name="max-token1" value="50" disabled>
+                    </label> 
+                    <label>
+                        <div class="tooltip-container">
+                            ?
+                            <span class="tooltip-text">Does Samples</span>
+                        </div>
+                        <h1>do_sample: </h1><input type="checkbox" name="do-sample1" disabled>
+                    </label> 
+                    <label>
+                        <div class="tooltip-container">
+                            ?
+                            <span class="tooltip-text">The temperature that the prompt will run [0 - 10]</span>
+                        </div>
+                        <h1>temperature: </h1><input type="number" step="0.1" name="temperature1" value="0.8" disabled>
+                    </label> 
+                    <label>
+                        <div class="tooltip-container">
+                            ?
+                            <span class="tooltip-text">Top K amount [0 - 100]</span>
+                        </div>
+                        <h1>top_k: </h1><input type="number" step="1" name="top-k1" value="50" disabled>
+                    </label> 
+                    <label>
+                        <div class="tooltip-container">
+                            ?
+                            <span class="tooltip-text">Top P amount [0 - 1]</span>
+                        </div>
+                        <h1>top_p: </h1><input type="number" step="0.01" name="top-p1" value="0.95" disabled>
+                    </label> 
+                    <label>
+                        <div class="tooltip-container">
+                            ?
+                            <span class="tooltip-text">How many times it repeats [0 - 50]</span>
+                        </div>
+                        <h1>repetition_penalty: </h1><input type="number" step="0.1" name="repetition-penalty1" value="1.1" disabled>
+                    </label> 
+                    <label>
+                        <div class="tooltip-container">
+                            ?
+                            <span class="tooltip-text">Allows the computer to think deeper</span>
+                        </div>
+                        <h1>enable_thinking: </h1><input type="checkbox" name="enable-thinking1" disabled>
+                    </label>
+                </form>
+            </div>
+
+            <div id="input-prompt-2">
+                <form class="generate-form">
+                    <h1>Configuration</h1>
+                    <label>
+                        <div class="tooltip-container">
+                            ?
+                            <span class="tooltip-text">The maximum token allowed to run this prompt [1 - 100]</span>
+                        </div>
+                        <h1>max_new_tokens: </h1><input type="number" step="1" name="max-token2" value="50">
+                    </label> 
+                    <label>
+                        <div class="tooltip-container">
+                            ?
+                            <span class="tooltip-text">Does Samples</span>
+                        </div>
+                        <h1>do_sample: </h1><input type="checkbox" name="do-sample2">
+                    </label> 
+                    <label>
+                        <div class="tooltip-container">
+                            ?
+                            <span class="tooltip-text">The temperature that the prompt will run [0 - 10]</span>
+                        </div>
+                        <h1>temperature: </h1><input type="number" step="0.1" name="temperature2" value="0.8">
+                    </label> 
+                    <label>
+                        <div class="tooltip-container">
+                            ?
+                            <span class="tooltip-text">Top K amount [0 - 100]</span>
+                        </div>
+                        <h1>top_k: </h1><input type="number" step="1" name="top-k2" value="50">
+                    </label>
+                    <label>
+                        <div class="tooltip-container">
+                            ?
+                            <span class="tooltip-text">Top P amount [0 - 1]</span>
+                        </div>
+                        <h1>top_p: </h1><input type="number" step="0.01" name="top-p2" value="0.95">
+                    </label> 
+                    <label>
+                        <div class="tooltip-container">
+                            ?
+                            <span class="tooltip-text">How many times it repeats [0 - 50]</span>
+                        </div>
+                        <h1>repetition_penalty: </h1><input type="number" step="0.1" name="repetition-penalty2" value="1.1">
+                    </label>
+                    <label>
+                        <div class="tooltip-container">
+                            ?
+                            <span class="tooltip-text">Allows the computer to think deeper</span>
+                        </div>
+                        <h1>enable_thinking: </h1><input type="checkbox" name="enable-thinking2">
+                    </label>
+                </form>
+            </div>
+        </div>
+
+        <!------------ INTERVENTION A ------------>
+        <div id="horizontal-container">
+            <div id="intervention-a">
+                <div id="horizontal-container">  
+                    <h1>Intervention</h1>
+                    <div class="tooltip-container">
+                        ?
+                        <span class="tooltip-text">Intervention allows the user to tweak more specific things</span>
+                    </div>
+                    <input type="checkbox" id="intervention-toggle-a" checked>
+                </div>
+                <form class="generate-form">
+                    <div class="horizontal-container">
+                        <button type="button" id="attention-a">Attention</button>
+                        <button type="button" id="mlp-a">MLP</button>
+                    </div>
+                    <!-- Intervention layers -->
+                    <div class="horizontal-container">
+                        <div class="tooltip-container">
+                            ?
+                            <span class="tooltip-text">Runs Specific layers (Minimum of 1)</span>
+                        </div>
+                        <h1>Layers: </h1>
+                        <div class="layers1">
+                            <label><h1>0</h1></label>
+                            <input type="checkbox" name="layer0" disabled checked>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>1</h1></label>
+                            <input type="checkbox" name="layer1" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>2</h1></label>
+                            <input type="checkbox" name="layer2" disabled checked>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>3</h1></label>
+                            <input type="checkbox" name="layer3" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>4</h1></label>
+                            <input type="checkbox" name="layer4" disabled checked>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>5</h1></label>
+                            <input type="checkbox" name="layer5" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>6</h1></label>
+                            <input type="checkbox" name="layer6" disabled checked>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>7</h1></label>
+                            <input type="checkbox" name="layer7" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>8</h1></label>
+                            <input type="checkbox" name="layer8" disabled checked>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>9</h1></label>
+                            <input type="checkbox" name="layer9" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>10</h1></label>
+                            <input type="checkbox" name="layer10" disabled checked>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>11</h1></label>
+                            <input type="checkbox" name="layer11" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>12</h1></label>
+                            <input type="checkbox" name="layer12" disabled checked>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>13</h1></label>
+                            <input type="checkbox" name="layer13" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>14</h1></label>
+                            <input type="checkbox" name="layer14" disabled checked>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>15</h1></label>
+                            <input type="checkbox" name="layer15" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>16</h1></label>
+                            <input type="checkbox" name="layer16" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>17</h1></label>
+                            <input type="checkbox" name="layer17" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>18</h1></label>
+                            <input type="checkbox" name="layer18" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>19</h1></label>
+                            <input type="checkbox" name="layer19" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>20</h1></label>
+                            <input type="checkbox" name="layer20" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>21</h1></label>
+                            <input type="checkbox" name="layer21" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>22</h1></label>
+                            <input type="checkbox" name="layer22" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>23</h1></label>
+                            <input type="checkbox" name="layer23" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>24</h1></label>
+                            <input type="checkbox" name="layer24" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>25</h1></label>
+                            <input type="checkbox" name="layer25" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>26</h1></label>
+                            <input type="checkbox" name="layer26" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>27</h1></label>
+                            <input type="checkbox" name="layer27" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>28</h1></label>
+                            <input type="checkbox" name="layer28" disabled>
+                        </div>
+                        <div class="layers1">
+                            <label><h1>29</h1></label>
+                            <input type="checkbox" name="layer29" disabled>
+                        </div>
+                    </div>
+
+                    <!-- Display different input depending on intervention-->
+                    <div id="intervention-display-a">
+                        <div id="attention-info-a" class="horizontal-container">
+                            <div class="tooltip-container">
+                                ?
+                                <span class="tooltip-text">How many heads (Minimum of 1)</span>
+                            </div>
+                            <h1>Head Index: </h1>
+                            <div class="idxs1" >
+                                <label><h1>0</h1></label>
+                                <input type="checkbox" name="head-idxs0" disabled checked>
+                            </div>
+                            <div class="idxs1">
+                                <label><h1>1</h1></label>
+                                <input type="checkbox" name="head-idxs1" disabled checked>
+                            </div>
+                            <div class="idxs1">
+                                <label><h1>2</h1></label>
+                                <input type="checkbox" name="head-idxs2" disabled checked>
+                            </div>
+                            <div class="idxs1">
+                                <label><h1>3</h1></label>
+                                <input type="checkbox" name="head-idxs3" disabled checked>
+                            </div>
+                            <div class="idxs1">
+                                <label><h1>4</h1></label>
+                                <input type="checkbox" name="head-idxs4" disabled checked>
+                            </div>
+                            <div class="idxs1">
+                                <label><h1>5</h1></label>
+                                <input type="checkbox" name="head-idxs5" disabled checked>
+                            </div>
+                            <div class="idxs1">
+                                <label><h1>6</h1></label>
+                                <input type="checkbox" name="head-idxs6" disabled checked>
+                            </div>
+                            <div class="idxs1">
+                                <label><h1>7</h1></label>
+                                <input type="checkbox" name="head-idxs7" disabled checked>
+                            </div>
+                            <div class="idxs1">
+                                <label><h1>8</h1></label>
+                                <input type="checkbox" name="head-idxs8" disabled checked>
+                            </div>
+                            <div class="idxs1">
+                                <label><h1>9</h1></label>
+                                <input type="checkbox" name="head-idxs9" disabled checked>
+                            </div>
+                            <div class="idxs1">
+                                <label><h1>10</h1></label>
+                                <input type="checkbox" name="head-idxs10" disabled checked>
+                            </div>
+                        </div>
+                        <div id="mlp-info-a" class="horizontal-container">
+                            <label><h1>Proportion: </h1><input type="number" step="0.01" min="0" max="1" name="proportion" value="0.65" disabled></label>
+                            <label><h1>Seed: </h1><input type="number" step="1" min="0" max="100" name="seed" value="42" disabled></label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!------------ INTERVENTION B ------------>
+        <div id="horizontal-container">
+            <div id="intervention-b">
+                <div id="horizontal-container">  
+                    <h1>Intervention</h1>
+                    <div class="tooltip-container">
+                        ?
+                        <span class="tooltip-text">Intervention allows the user to tweak more specific things</span>
+                    </div>
+                    <input type="checkbox" id="intervention-toggle-b" checked>
+                </div>
+                <form class="generate-form">
+                    <div class="horizontal-container">
+                        <button type="button" id="attention-b">Attention</button>
+                        <button type="button" id="mlp-b">MLP</button>
+                    </div>
+                    <!-- Intervention layers -->
+                    <div class="horizontal-container">
+                        <div class="tooltip-container">
+                            ?
+                            <span class="tooltip-text">Runs Specific layers (Minimum of 1)</span>
+                        </div>
+                        <h1>Layers: </h1>
+                        <div class="layers2">
+                            <label><h1>0</h1></label>
+                            <input type="checkbox" name="layer0">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>1</h1></label>
+                            <input type="checkbox" name="layer1">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>2</h1></label>
+                            <input type="checkbox" name="layer2">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>3</h1></label>
+                            <input type="checkbox" name="layer3">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>4</h1></label>
+                            <input type="checkbox" name="layer4">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>5</h1></label>
+                            <input type="checkbox" name="layer5">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>6</h1></label>
+                            <input type="checkbox" name="layer6">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>7</h1></label>
+                            <input type="checkbox" name="layer7">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>8</h1></label>
+                            <input type="checkbox" name="layer8">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>9</h1></label>
+                            <input type="checkbox" name="layer9">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>10</h1></label>
+                            <input type="checkbox" name="layer10">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>11</h1></label>
+                            <input type="checkbox" name="layer11">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>12</h1></label>
+                            <input type="checkbox" name="layer12">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>13</h1></label>
+                            <input type="checkbox" name="layer13">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>14</h1></label>
+                            <input type="checkbox" name="layer14">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>15</h1></label>
+                            <input type="checkbox" name="layer15">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>16</h1></label>
+                            <input type="checkbox" name="layer16">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>17</h1></label>
+                            <input type="checkbox" name="layer17">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>18</h1></label>
+                            <input type="checkbox" name="layer18">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>19</h1></label>
+                            <input type="checkbox" name="layer19">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>20</h1></label>
+                            <input type="checkbox" name="layer20">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>21</h1></label>
+                            <input type="checkbox" name="layer21">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>22</h1></label>
+                            <input type="checkbox" name="layer22">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>23</h1></label>
+                            <input type="checkbox" name="layer23">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>24</h1></label>
+                            <input type="checkbox" name="layer24">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>25</h1></label>
+                            <input type="checkbox" name="layer25">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>26</h1></label>
+                            <input type="checkbox" name="layer26">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>27</h1></label>
+                            <input type="checkbox" name="layer27">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>28</h1></label>
+                            <input type="checkbox" name="layer28">
+                        </div>
+                        <div class="layers2">
+                            <label><h1>29</h1></label>
+                            <input type="checkbox" name="layer29">
+                        </div>
+                    </div>
+
+                    <!-- Display different input depending on intervention-->
+                    <div id="intervention-display">
+                        <div id="attention-info-b" class="horizontal-container">
+                            <div class="tooltip-container">
+                                ?
+                                <span class="tooltip-text">How many heads (Minimum of 1)</span>
+                            </div>
+                            <h1>Head Index: </h1>
+                            <div class="idxs2" >
+                                <label><h1>0</h1></label>
+                                <input type="checkbox" name="head-idxs0">
+                            </div>
+                            <div class="idxs2">
+                                <label><h1>1</h1></label>
+                                <input type="checkbox" name="head-idxs1">
+                            </div>
+                            <div class="idxs2">
+                                <label><h1>2</h1></label>
+                                <input type="checkbox" name="head-idxs2">
+                            </div>
+                            <div class="idxs2">
+                                <label><h1>3</h1></label>
+                                <input type="checkbox" name="head-idxs3">
+                            </div>
+                            <div class="idxs2">
+                                <label><h1>4</h1></label>
+                                <input type="checkbox" name="head-idxs4">
+                            </div>
+                            <div class="idxs2">
+                                <label><h1>5</h1></label>
+                                <input type="checkbox" name="head-idxs5">
+                            </div>
+                            <div class="idxs2">
+                                <label><h1>6</h1></label>
+                                <input type="checkbox" name="head-idxs6">
+                            </div>
+                            <div class="idxs2">
+                                <label><h1>7</h1></label>
+                                <input type="checkbox" name="head-idxs7">
+                            </div>
+                            <div class="idxs2">
+                                <label><h1>8</h1></label>
+                                <input type="checkbox" name="head-idxs8">
+                            </div>
+                            <div class="idxs2">
+                                <label><h1>9</h1></label>
+                                <input type="checkbox" name="head-idxs9">
+                            </div>
+                            <div class="idxs2">
+                                <label><h1>10</h1></label>
+                                <input type="checkbox" name="head-idxs10">
+                            </div>
+                        </div>
+                        <div id="mlp-info-b" class="horizontal-container">
+                            <label><h1>Proportion: </h1><input type="number" step="0.01" min="0" max="1" name="proportion"></label>
+                            <label><h1>Seed: </h1><input type="number" step="1" min="0" max="100" name="seed"></label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!------------ OTHER INFO ------------>
+        <div class="horizontal-container">
+            <div class="vertical-container">
+                <p>Condition A latency</p>
+                <p id="condition-a-latency"> N/A</p>
+            </div>
+            <div class="vertical-container">
+                <p>Generated Token Amount</p>
+                <p id="condition-a-tokens"> N/A</p>
+            </div>
+            <div class="vertical-container">
+                <p>Tokens Per Second</p>
+                <p id="condition-a-token-per-second"> N/A</p>
+            </div>
+            <div class="vertical-container">
+                <p>Condition B latency</p>
+                <p id="condition-b-latency"> N/A</p>
+            </div>
+            <div class="vertical-container">
+                <p>Generated Token Amount</p>
+                <p id="condition-b-tokens"> N/A</p>
+            </div>
+            <div class="vertical-container">
+                <p>Tokens Per Second</p>
+                <p id="condition-b-token-per-second"> N/A</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

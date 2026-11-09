@@ -1,0 +1,31 @@
+{
+  "prompt": "Hello, this is request mlp intervention.",
+  "configuration_a": {
+    "generation": {
+      "max_new_tokens": 50,
+      "do_sample": false,
+      "temperature": 0.8,
+      "top_k": 50,
+      "top_p": 0.95,
+      "repetition_penalty": 1.1,
+      "enable_thinking": false
+    }
+  },
+  "configuration_b": {
+    "generation": {
+      "max_new_tokens": 50,
+      "do_sample": false,
+      "temperature": 0.8,
+      "top_k": 50,
+      "top_p": 0.95,
+      "repetition_penalty": 1.1,
+      "enable_thinking": false
+    },
+    "intervention": {
+      "type": "mlp",
+      "layers": [0,2,4,6,8,10,12,14],
+      "proportion": 0.65,
+      "seed": 42
+    }
+  }
+}

@@ -1,0 +1,529 @@
+/* ==============================================================
+   BASIC STYLE - body, .class and #id selectors only
+   One declaration per line, grouped by section
+   ============================================================= */
+ 
+/* ---------- PAGE ---------- */
+body{
+    margin-top: 0px;
+    margin-left: 6%;
+    margin-right: 6%;
+    padding-top: 90px;
+    background: #f4f3ef;
+    color: #111;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+ 
+/* Keyboard focus (so you can see where you are when pressing Tab) */
+button:focus-visible{
+    outline: 2px solid #e88f50;
+    outline-offset: 2px;
+}
+ 
+input:focus-visible{
+    outline: 2px solid #e88f50;
+    outline-offset: 1px;
+}
+ 
+/* ---------- LAYOUT HELPERS ---------- */
+.horizontal-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    gap: 14px;
+}
+ 
+.vertical-container{
+    flex: 1;
+    box-sizing: border-box;
+    padding: 12px 18px;
+    background: white;
+    border: 1px solid #e4e2dc;
+    border-radius: 12px;
+}
+ 
+.vertical-container p{
+    margin: 4px 0;
+    font-size: 12px;
+    color: #6b6b66;
+}
+ 
+/* ---------- TOP BAR (stays at the top of the browser) ---------- */
+#top-bar{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 12px 40px;
+    background: #fbfaf8;
+    border-bottom: 1px solid #e4e2dc;
+}
+ 
+#top-bar .horizontal-container{
+    justify-content: flex-start;
+    gap: 24px;
+}
+ 
+#top-bar h1{
+    margin: 0;
+    font-size: 18px;
+}
+ 
+#top-bar h2{
+    margin: 0;
+    font-size: 13px;
+    font-weight: normal;
+    color: #6b6b66;
+    cursor: pointer;
+}
+ 
+#top-bar h2:hover{
+    color: #111;
+}
+ 
+#top-bar p{
+    margin: 0;
+    font-size: 12px;
+    color: #6b6b66;
+}
+ 
+/* Add class="live-status" to the "Live model online" paragraph */
+.live-status{
+    color: #2f8f4e;
+}
+ 
+/* ---------- LEFT COLUMN ---------- */
+#left-side{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 0px 0 40px 0;
+}
+ 
+/* ---------- PROMPT ---------- */
+#prompt{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    font-size: 15px;
+    background: white;
+    border: 1px solid #e4e2dc;
+    border-radius: 12px;
+}
+ 
+#prompt p{
+    margin: 0;
+    font-weight: bold;
+}
+ 
+#prompt-input{
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 15px;
+    background: #f9f9f9;
+    border: 1px solid #e4e2dc;
+    border-radius: 8px;
+}
+ 
+/* ---------- SHARED ---------- */
+#shared{
+    font-size: 12px;
+    color: #6b6b66;
+}
+ 
+#shared p{
+    margin: 0;
+}
+ 
+.shared-info{
+    padding: 5px 10px;
+    font-family: Consolas, monospace;
+    color: #111;
+    background: white;
+    border: 1px solid #e4e2dc;
+    border-radius: 6px;
+}
+ 
+/* ---------- MODEL OPTION ---------- */
+.model-option{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+ 
+/* Small grey buttons (the debug ones). Single/Double override this below */
+.model-option button{
+    padding: 6px 10px;
+    font-size: 11px;
+    color: #111;
+    background: #e9e7e1;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+ 
+.model-option h2{
+    margin: 0 0 0 20px;
+    font-size: 11px;
+    color: #6b6b66;
+}
+ 
+/* ---------- MODEL CARDS ---------- */
+#model-1, #model-2{
+    flex: 1;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 245px;
+    padding: 4px 24px 18px 24px;
+    background: white;
+    border: 1px solid #e4e2dc;
+    border-radius: 12px;
+}
+ 
+/* Coloured top edge so you can tell the two models apart */
+#model-1{
+    border-top: 4px solid #6b6b66;
+}
+ 
+#model-2{
+    border-top: 4px solid #e88f50;
+}
+ 
+.model-info{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-family: Consolas, monospace;
+    color: #6b6b66;
+}
+ 
+.model-info h1{
+    margin: 12px 0;
+    font-size: 18px;
+    font-family: Arial, sans-serif;
+    color: #111;
+}
+ 
+.model-info p{
+    margin: 0;
+}
+ 
+.model-text{
+    font-size: 16px;
+    line-height: 1.9;
+}
+ 
+.low{ background: #fbe3cf; }
+.mid{ background: #f2b98a; }
+.high{ background: #e88f50; }
+ 
+/* ---------- RESET BUTTONS ---------- */
+#model-reset{
+    gap: 14px;
+}
+ 
+/* ---------- CONFIGURATION (word-info) ---------- */
+.word-info{
+    align-items: flex-start;
+    gap: 20px;
+    padding: 16px 24px;
+    background: white;
+    border: 1px solid #e4e2dc;
+    border-radius: 12px;
+}
+ 
+#input-prompt-1, #input-prompt-2{
+    flex: 1;
+}
+ 
+/* ---------- BUTTONS: all grey ---------- */
+#double-model, #system-prompt, #model-1-reset, #model-2-reset, #attention-a, #mlp-a, #attention-b, #mlp-b{
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: bold;
+    color: #111;
+    background: #dcdad4;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+ 
+#single-model{
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: bold;
+    color: #dcdad4;
+    background: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+ 
+#single-model:active, #double-model:active, #system-prompt:active ,#model-1-reset:active, #model-2-reset:active{
+    background-color: #b6b4af;
+}
+ 
+#model-1-reset, #model-2-reset, #attention, #mlp{
+    flex: 1;
+}
+ 
+/* ---------- BUTTON: Run comparison (dark) ---------- */
+.dark-button{
+    padding: 12px 24px;
+    font-size: 13px;
+    font-weight: bold;
+    color: white;
+    background: #111;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+ 
+.dark-button:hover{
+    background: #333;
+}
+ 
+.dark-button:disabled{
+    background: #8a8a85;
+}
+ 
+/* ---------- FORM ---------- */
+.generate-form{
+    width: 100%;
+    box-sizing: border-box;
+    padding: 16px;
+    border: 1px solid #e4e2dc;
+    border-radius: 8px;
+    background: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 220px;
+}
+ 
+.generate-form h1{
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+    text-align: center;
+}
+ 
+.generate-form label{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+ 
+/* Setting names (max_new_tokens, top_k ...) */
+.generate-form label h1{
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: normal;
+    text-align: left;
+}
+ 
+.generate-form input[type="number"]{
+    width: 90px;
+    height: 20px;
+    font-size: 1rem;
+    padding: 4px 6px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+}
+ 
+.generate-form input[type="checkbox"]{
+    width: 24px;
+    height: 24px;
+}
+ 
+/* Greyed out when Single Model is selected */
+input:disabled{
+    background: #ececea;
+    cursor: not-allowed;
+}
+ 
+/* ---------- INTERVENTION ---------- */
+#intervention{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 24px;
+    background: white;
+    border: 1px solid #e4e2dc;
+    border-radius: 12px;
+}
+ 
+#intervention h1{
+    margin: 0;
+    font-size: 1.1rem;
+}
+ 
+#intervention-toggle-a, #intervention-toggle-b{
+    align-self: flex-start;
+    width: 20px;
+    height: 20px;
+}
+ 
+/* The form inside is already in a card, so remove its own box */
+#intervention .generate-form{
+    padding: 0;
+    border: none;
+    background: none;
+}
+ 
+#intervention .horizontal-container{
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 8px;
+}
+ 
+/* ---------- LAYER AND HEAD TILES ---------- */
+.layers, .idxs{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 44px;
+    padding: 6px 0;
+    background: #f9f9f9;
+    border: 1px solid #e4e2dc;
+    border-radius: 6px;
+}
+ 
+.layers label h1, .idxs label h1{
+    margin: 0;
+    font-size: 0.8rem;
+    text-align: center;
+}
+ 
+.layers input[type="checkbox"], .idxs input[type="checkbox"]{
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    cursor: pointer;
+}
+ 
+/* Highlight a tile when its box is ticked */
+.layers:has(input:checked), .idxs:has(input:checked){
+    background: #fbe3cf;
+    border-color: #e88f50;
+}
+ 
+/* ---------- LATENCY ---------- */
+#condition-a-latency, #condition-b-latency, #condition-a-tokens, #condition-b-tokens, #condition-a-token-per-second, #condition-b-token-per-second{
+    margin: 6px 0;
+    font-size: 22px;
+    font-weight: bold;
+    color: #111;
+}
+ 
+/* ---------- SMALL SCREENS ---------- */
+@media (max-width: 800px){
+    body{
+        margin-left: 3%;
+        margin-right: 3%;
+    }
+ 
+    #top-bar .horizontal-container + .horizontal-container{
+        display: none;
+    }
+}
+
+/* ---------- TOOL TIP ---------- */
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+    font-weight: bold;
+    border: 1px solid #555;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    text-align: center;
+    line-height: 20px;
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.tooltip-text {
+    visibility: hidden;
+    width: 180px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 6px 8px;
+    position: absolute;
+    z-index: 10;
+    bottom: 125%; /* Positions the box above the icon */
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+.tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* ---------- TUTORIAL ---------- */
+
+.tutorial-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 1000px;
+  margin: 20px auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.display-window {
+  text-align: center;
+}
+
+.display-window img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 10px;
+  border-radius: 4px;
+}
+
+.nav-arrow {
+  background: black;
+  color: white;
+  border: none;
+  font-size: 24px;
+  padding: 10px 15px;
+  border-radius: 20%;
+  cursor: pointer;
+}
+
+.nav-arrow:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+#stepText {
+  font-family: sans-serif;
+  font-size: 14px;
+  color: #666;
+}

@@ -1,0 +1,25 @@
+{
+  "prompt": "Hello, this is request no intervention.",
+  "configuration_a": {
+    "generation": {
+      "max_new_tokens": 50,
+      "do_sample": false,
+      "temperature": 0.8,
+      "top_k": 50,
+      "top_p": 0.95,
+      "repetition_penalty": 1.1,
+      "enable_thinking": false
+    }
+  },
+  "configuration_b": {
+    "generation": {
+      "max_new_tokens": 50,
+      "do_sample": true,
+      "temperature": 0.95,
+      "top_k": 50,
+      "top_p": 0.95,
+      "repetition_penalty": 1.8,
+      "enable_thinking": true
+    }
+  }
+}

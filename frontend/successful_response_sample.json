@@ -1,0 +1,6 @@
+{
+  "condition_a_text": "Here is the text response from model A for sucessful response",
+  "condition_b_text": "Here is the text response from model B for sucessful response",
+  "condition_a_latency_ms": 1.1,
+  "condition_b_latency_ms": 2.2
+}
