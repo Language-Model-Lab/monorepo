@@ -1,17 +1,14 @@
 # KernelBackend
 
-An AI language model experimentation project combining a FastAPI backend with
-weight only quantization and CUDA benchmarking for Qwen3-0.6B.
+An AI language model experimentation project combining a browser-based frontend, a FastAPI backend, weight only quantization, and CUDA benchmarking for Qwen3-0.6B.
 
-The repository uses a uv workspace so each component declares its own dependencies,
-while one root `uv.lock` and root `.venv` provide a shared development environment.
-The backend currently loads the standard model through Transformers and connecting
-it to quant's quantized inference path is a also an integration step.
+The repository uses a uv workspace so each Python component declares its own dependencies, while one root `uv.lock` and root `.venv` provide a shared development environment. The backend currently loads the standard model through Transformers; connecting it to quant's quantized inference path remains an integration step.
 
 ## Repository layout
 
 | Path | Role |
 |---|---|
+| `frontend/` | Browser-based interface for configuring experiments, sending API requests, and displaying generated outputs and metrics. |
 | `backend/` | API, generation settings, model loading, and attention/MLP interventions |
 | `quant/` | Quantization library, CUDA sources, fidelity checks, and benchmark scripts |
 | `notebooks/` | Exploratory model and intervention notebooks |
@@ -27,8 +24,7 @@ First install uv and Python 3.14, run the following from the repository root:
 uv sync --locked --all-packages --all-groups
 ```
 
-- This installs both components and their development dependencies into the root
-`.venv`. `--locked` rejects an old lockfile instead of changing it.
+- This installs both Python workspace components and their development dependencies into the root `.venv`. `--locked` rejects an old lockfile instead of changing it.
 - Make sure to run this after cloning or pulling dependency changes.
 
 - Manual environment activation is unnecessary. If an environment from another
@@ -60,6 +56,10 @@ Allow sufficient memory for the model. Device placement is selected automaticall
 
 - Backend is installed as the `kernel_backend` Python package, so this entry point
 also works from `backend/`. Importing the API still loads the model immediately.
+
+## Start the frontend
+
+The frontend is located in `frontend/` and consists of plain HTML, CSS, and JavaScript. For local development, open `frontend/index.html` using VS Code Live Server. By default, Live Server serves the frontend at <http://localhost:5500>. The FastAPI backend must be started separately and is expected to run at <http://127.0.0.1:8000>. The frontend sends generation requests to the backend through `POST /generate`.
 
 ## Run tests
 
@@ -104,7 +104,7 @@ the migration baseline.
 NVIDIA GPU.
 - Extension builds also require a compatible CUDA toolkit/compiler and
 host C++ compiler. 
-- Ninja is included in quant's dependencies
+- Ninja is included in quant's dependencies.
 - CUDA extension sources currently target compute capability 8.9 by default. 
 - First use may compile an extension. The migration baseline is **9 passed, 58 deselected**; check for skipped tests when validating a machine without CUDA.
 
