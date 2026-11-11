@@ -33,5 +33,6 @@ testpaths = ["tests"]
 markers = [
     "model: needs the real Qwen3-0.6B checkpoint and a CUDA GPU (run with -m model)",
     "gpu: needs a CUDA GPU and may build a CUDA extension (run with -m gpu)",
+    "multi_gpu: needs two or more CUDA GPUs; the only skip QUANT_REQUIRE_CUDA=1 allows",
 ]
 addopts = "-m 'not model and not gpu'"

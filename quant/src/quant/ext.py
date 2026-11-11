@@ -24,3 +24,8 @@ def load_extension(name: str, sources: tuple[str, ...]):
 
 def bandwidth_ext():
     return load_extension("quant_bandwidth", ("bandwidth.cu",))
+
+
+def gemv_ext():
+    return load_extension("quant_gemv", ("gemv.cu",))
+

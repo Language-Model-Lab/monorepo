@@ -1,10 +1,14 @@
+import math
+
 import torch
 import torch.nn.functional as F
 from torch import nn
 
+from quant import gemv as _gemv
 from quant.quantize import quantize_int8_per_channel
 
 BACKENDS = ("reference", "cuda")
+CUDA_ACTIVATION_DTYPES = (torch.float16, torch.bfloat16)
 
 
 class QuantizedLinear(nn.Module):
@@ -12,6 +16,10 @@ class QuantizedLinear(nn.Module):
 
     The reference backend computes y = s * (x @ q^T) (+ b) in FP32 and casts to the input dtype:
     the exact math of plan section 5.1, and the FP32 reference the CUDA kernel is tested against.
+
+    The cuda backend runs single-vector inputs (batch-1 decode) through the v0 INT8 GEMV kernel and every
+    other input through the reference arithmetic, so prefill keeps the reference numerics. It is
+    inference-only and needs CUDA tensors with FP16 or BF16 activations.
     """
 
     def __init__(
@@ -57,13 +65,43 @@ class QuantizedLinear(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if self.backend == "reference":
-            y = F.linear(x.float(), self.qweight.float()) * self.scales
-            if self.bias is not None:
-                y = y + self.bias.float()
-            return y.to(x.dtype)
+            return self._reference_forward(x)
         if self.backend == "cuda":
-            raise NotImplementedError("the CUDA backend arrives in Phase 2 (task 2.K6)")
+            return self._cuda_forward(x)
         raise ValueError(f"unknown backend {self.backend!r}")
+
+    def _reference_forward(self, x: torch.Tensor) -> torch.Tensor:
+        y = F.linear(x.float(), self.qweight.float()) * self.scales
+        if self.bias is not None:
+            y = y + self.bias.float()
+        return y.to(x.dtype)
+
+    def _cuda_forward(self, x: torch.Tensor) -> torch.Tensor:
+        if x.shape[-1] != self.in_features:
+            raise ValueError(f"expected {self.in_features} input features, got shape {tuple(x.shape)}")
+        # Never fall back to CPU execution silently: a CUDA backend on CPU tensors is a configuration error.
+        if not (x.is_cuda and self.qweight.is_cuda and self.scales.is_cuda):
+            raise RuntimeError(
+                f"backend='cuda' needs CUDA tensors; got x on {x.device}, qweight on {self.qweight.device}, "
+                f"scales on {self.scales.device}"
+            )
+        if x.dtype not in CUDA_ACTIVATION_DTYPES:
+            raise RuntimeError(f"backend='cuda' needs float16 or bfloat16 activations, got {x.dtype}")
+        # One contract for both paths below, although only the kernel lacks a backward.
+        if torch.is_grad_enabled() and x.requires_grad:
+            raise RuntimeError(
+                "backend='cuda' is inference-only: run under torch.no_grad() or pass inputs that do not "
+                "require grad"
+            )
+        leading = x.shape[:-1]
+        vectors = math.prod(leading)
+        if vectors == 0:
+            return x.new_empty((*leading, self.out_features))
+        if vectors > 1:
+            return self._reference_forward(x)
+        bias = self.bias.float() if self.bias is not None else None
+        y = _gemv.int8_gemv(x.reshape(1, self.in_features).contiguous(), self.qweight, self.scales, bias)
+        return y.view(*leading, self.out_features)
 
     def _apply(self, fn, recurse=True):
         # Module.to(dtype) and .half() would also cast the FP32 scales. Hide them from fn,

@@ -3,7 +3,7 @@ from collections.abc import Callable
 import torch
 from torch import nn
 
-from quant.quantized_linear import QuantizedLinear
+from quant.quantized_linear import BACKENDS, QuantizedLinear
 
 #Raises unless lm_head still shares its tensor with embed_tokens.
 def verify_tied_embeddings(model) -> None:
@@ -47,3 +47,17 @@ def quantize_model_(
     if getattr(model.config, "tie_word_embeddings", False):
         verify_tied_embeddings(model)
     return [path for _, _, path, _ in targets]
+
+
+def set_backend_(model, backend: str) -> int:
+    """Sets the execution backend of every QuantizedLinear in place and returns how many were visited.
+
+    This changes only how the INT8 weights execute (reference arithmetic or the CUDA kernel). Weights, scales
+    and the model's dtype are untouched; it does not recover 16-bit weights. Repeated calls are idempotent.
+    """
+    if backend not in BACKENDS:
+        raise ValueError(f"backend must be one of {BACKENDS}, got {backend!r}")
+    modules = [m for m in model.modules() if isinstance(m, QuantizedLinear)]
+    for module in modules:
+        module.backend = backend
+    return len(modules)

@@ -77,10 +77,18 @@ def test_forward_hook_sees_returned_tensor(linear):
     assert len(seen) == 1 and seen[0] is y
 
 
-def test_cuda_backend_not_yet_implemented(linear):
+def test_cuda_backend_rejects_cpu_tensors(linear):
+    # No silent CPU fallback: the CUDA backend on CPU tensors is a configuration error.
+    module = QuantizedLinear.from_linear(linear.to(torch.bfloat16), backend="cuda")
+    for shape in [(1, 256), (4, 256)]:
+        with pytest.raises(RuntimeError, match="needs CUDA tensors"):
+            module(torch.randn(shape, dtype=torch.bfloat16))
+
+
+def test_cuda_backend_rejects_wrong_feature_count(linear):
     module = QuantizedLinear.from_linear(linear, backend="cuda")
-    with pytest.raises(NotImplementedError):
-        module(torch.randn(1, 256))
+    with pytest.raises(ValueError, match="256 input features"):
+        module(torch.randn(1, 255))
 
 
 def test_unknown_backend_rejected(linear):

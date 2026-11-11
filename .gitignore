@@ -47,5 +47,5 @@ Thumbs.db
 #local experiment results
 /quant/results/
 
-#documentation
-/documentation
+# Generated documentation artifacts (source Markdown and diagrams are tracked)
+/documentation/artifacts/

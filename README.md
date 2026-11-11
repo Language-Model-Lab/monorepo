@@ -15,7 +15,7 @@ it to quant's quantized inference path is a also an integration step.
 | `backend/` | API, generation settings, model loading, and attention/MLP interventions |
 | `quant/` | Quantization library, CUDA sources, fidelity checks, and benchmark scripts |
 | `notebooks/` | Exploratory model and intervention notebooks |
-| `documentation/` | Progress reports, meeting notes, mockups, abstracts, and shared project documentation |
+| [`documentation/`](documentation/README.md) | Indexed project background, integration evidence, draft plans, reviews, and mockups |
 | `pyproject.toml` | Workspace membership |
 | `uv.lock` | Shared, reproducible dependency resolution; commit changes to this file |
 
@@ -127,7 +127,10 @@ and generation using the real Qwen3-0.6B checkpoint.
 - The migration baseline is **6 passed, 61 deselected**.
 
 - These counts describe the migration checkpoint; update them as tests are added.
-- Record in [independent baselines] and [workspace validation] dedicated documentation
+- See [independent baselines](documentation/integration/independent-baselines.md),
+  [workspace validation](documentation/integration/workspace-validation.md), and
+  the [documentation index](documentation/README.md) for historical evidence and
+  current planning.
 
 ## Quant experiments
 

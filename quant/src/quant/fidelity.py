@@ -11,9 +11,13 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
+from quant.quantized_linear import QuantizedLinear
+
 LOGIT_SLICE = 256  # tokens per slice for the float32 log-softmax, to bound memory
 SAMPLING_NON_THINKING = {"do_sample": True, "temperature": 0.7, "top_p": 0.8, "top_k": 20}  # model card
 NORM_OF_PROJ = {"self_attn.q_proj": "self_attn.q_norm", "self_attn.k_proj": "self_attn.k_norm"}
+# Both implementations of a decoder linear; comparing two quantized models must not lose their linears.
+LINEAR_TYPES = (nn.Linear, QuantizedLinear)
 
 #Running comparison of reference vs test activations, one row per token.
 class ErrorStats:
@@ -84,10 +88,32 @@ def hook_points(model) -> list[str]:
     for i, layer in enumerate(model.model.layers):
         prefix = f"model.layers.{i}"
         for name, module in layer.named_modules():
-            if isinstance(module, nn.Linear) or name in NORM_OF_PROJ.values():
+            if isinstance(module, LINEAR_TYPES) or name in NORM_OF_PROJ.values():
                 points.append(f"{prefix}.{name}")
         points.append(prefix)
     return points
+
+
+#Returns the shared hook points; raises unless both models have the same points and linear shapes.
+def _check_inventories(model_ref, model_q) -> list[str]:
+    points_ref, points_q = hook_points(model_ref), hook_points(model_q)
+    set_ref, set_q = set(points_ref), set(points_q)
+    problems = []
+    if points_ref != points_q:
+        missing = [p for p in points_ref if p not in set_q]
+        extra = [p for p in points_q if p not in set_ref]
+        problems.append(f"hook points differ (missing from model_q: {missing}; extra in model_q: {extra})")
+    for p in (p for p in points_ref if p in set_q):
+        a, b = model_ref.get_submodule(p), model_q.get_submodule(p)
+        if isinstance(a, LINEAR_TYPES) and isinstance(b, LINEAR_TYPES):
+            if (a.in_features, a.out_features) != (b.in_features, b.out_features):
+                problems.append(
+                    f"{p} is {a.in_features}->{a.out_features} in model_ref "
+                    f"but {b.in_features}->{b.out_features} in model_q"
+                )
+    if problems:
+        raise ValueError("model inventories differ: " + "; ".join(problems))
+    return points_ref
 
 
 @torch.no_grad()
@@ -98,10 +124,11 @@ def compare_activations(model_ref, model_q, batches: Iterable[torch.Tensor]) -> 
         through depth).
     local: each linear of model_q applied to the *reference* input of that linear, against the reference
         output (that layer's own error). For q_proj/k_proj the same comparison is repeated after q_norm/k_norm.
-    Both models must share module paths (model_q is model_ref after surgery).
+    Both models must share module paths and linear shapes (model_q is model_ref after surgery, or another
+    quantized copy); a mismatch raises ValueError before any hook is registered.
     """
-    points = hook_points(model_ref)
-    linears = [p for p in points if isinstance(model_ref.get_submodule(p), nn.Linear)]
+    points = _check_inventories(model_ref, model_q)
+    linears = [p for p in points if isinstance(model_ref.get_submodule(p), LINEAR_TYPES)]
     head_dim = model_ref.config.head_dim
     compounded = {p: _PositionSplitStats() for p in points}
     local = {}
@@ -138,18 +165,24 @@ def compare_activations(model_ref, model_q, batches: Iterable[torch.Tensor]) -> 
             compounded[path].update(captured[path], _first_tensor(output))
         return hook
 
+    # Only the handles registered here are removed, so hooks the caller installed survive a failure.
     for input_ids in batches:
         input_ids = input_ids.to(model_ref.device)
         captured = {}
-        handles = [model_ref.get_submodule(p).register_forward_hook(store_hook(p, captured)) for p in points]
-        handles += [model_ref.get_submodule(p).register_forward_hook(local_hook(p)) for p in linears]
+        handles = []
         try:
+            for p in points:
+                handles.append(model_ref.get_submodule(p).register_forward_hook(store_hook(p, captured)))
+            for p in linears:
+                handles.append(model_ref.get_submodule(p).register_forward_hook(local_hook(p)))
             model_ref(input_ids, use_cache=False)
         finally:
             for h in handles:
                 h.remove()
-        handles = [model_q.get_submodule(p).register_forward_hook(compare_hook(p, captured)) for p in points]
+        handles = []
         try:
+            for p in points:
+                handles.append(model_q.get_submodule(p).register_forward_hook(compare_hook(p, captured)))
             model_q(input_ids, use_cache=False)
         finally:
             for h in handles:
@@ -175,9 +208,27 @@ def sliding_window_eval(
 
     All models run on the same windows. Each non-reference model is also compared with the reference on the
     scored positions: KL(reference || model), top-1 agreement, largest logit difference.
+
+    Windows must overlap (0 < stride < ctx): each window's first new token is predicted from the token
+    before it, which a non-overlapping window does not contain.
     """
+    if not models:
+        raise ValueError("models must not be empty")
+    if reference is not None and reference not in models:
+        raise ValueError(f"reference {reference!r} is not one of the models {list(models)}")
+    if ctx < 2:
+        raise ValueError(f"ctx must be at least 2, got {ctx}")
+    if not 0 < stride < ctx:
+        raise ValueError(
+            f"stride must satisfy 0 < stride < ctx, got stride={stride}, ctx={ctx}; "
+            "non-overlapping windows leave each window's first token unscored"
+        )
+    if ids.dim() != 1:
+        raise ValueError(f"ids must be a 1-D token stream, got shape {tuple(ids.shape)}")
     if max_tokens is not None:
         ids = ids[:max_tokens]
+    if ids.numel() < 2:
+        raise ValueError(f"need at least 2 tokens to score, got {ids.numel()}")
     reference = reference or next(iter(models))
     n = ids.numel()
     nll = dict.fromkeys(models, 0.0)

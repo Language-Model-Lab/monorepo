@@ -3,7 +3,7 @@ import torch
 from torch import nn
 
 from quant.quantized_linear import QuantizedLinear
-from quant.surgery import quantize_model_
+from quant.surgery import quantize_model_, set_backend_
 
 LINEARS_PER_LAYER = 7
 
@@ -72,6 +72,24 @@ def test_refuses_fp16_without_changing_model(tiny_model):
     with pytest.raises(ValueError, match="FP16"):
         quantize_model_(tiny_model)
     assert not any(isinstance(m, QuantizedLinear) for m in tiny_model.modules())
+
+
+def test_set_backend_switches_every_module_idempotently(tiny_model):
+    quantize_model_(tiny_model)
+    buffers = {name: b.clone() for name, b in tiny_model.named_buffers()}
+    expected = tiny_model.config.num_hidden_layers * LINEARS_PER_LAYER
+    for backend in ("cuda", "cuda", "reference"):
+        assert set_backend_(tiny_model, backend) == expected
+        assert {m.backend for m in tiny_model.modules() if isinstance(m, QuantizedLinear)} == {backend}
+    # An execution-backend switch only: no buffer changes.
+    assert all(torch.equal(b, buffers[name]) for name, b in tiny_model.named_buffers())
+
+
+def test_set_backend_rejects_unknown_backend_without_changes(tiny_model):
+    quantize_model_(tiny_model)
+    with pytest.raises(ValueError, match="backend"):
+        set_backend_(tiny_model, "triton")
+    assert {m.backend for m in tiny_model.modules() if isinstance(m, QuantizedLinear)} == {"reference"}
 
 
 def test_cast_after_surgery_keeps_fp32_scales(tiny_model):
