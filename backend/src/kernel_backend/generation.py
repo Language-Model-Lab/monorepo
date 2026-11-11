@@ -1,4 +1,4 @@
-from kernel_backend.interventions import add_head_ablation, add_mlp_ablation
+from kernel_backend.interventions import add_head_scaling, add_mlp_scaling
 import torch
 import time
 from dataclasses import dataclass
@@ -58,19 +58,21 @@ def run_generation(model, tokenizer, prompt: str, request:ExperimentConfiguratio
         if intervention_settings is not None:
             if intervention_settings.type == "mlp":
                 for layer_idx in intervention_settings.layers:
-                    handle, _, _, _ = add_mlp_ablation(
+                    handle, _, _, _ = add_mlp_scaling(
                         model=model, 
                         layer_idx=layer_idx, 
                         proportion= intervention_settings.proportion, 
-                        seed=intervention_settings.seed
+                        seed=intervention_settings.seed,
+                        scale=intervention_settings.scale
                         )
                     handles.append(handle)
             elif intervention_settings.type == "attention":
                 for layer_idx in intervention_settings.layers:
-                    handle, _, _ = add_head_ablation(
+                    handle, _, _ = add_head_scaling(
                         model=model, 
                         layer_idx=layer_idx, 
                         head_indices= intervention_settings.head_idxs, 
+                        scale=intervention_settings.scale,
                         )
                     handles.append(handle)
                         

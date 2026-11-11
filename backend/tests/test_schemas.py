@@ -45,12 +45,14 @@ def test_valid_MLP_intervention_settings():
         layers=[0,1,2],
         proportion=0.45,
         seed=100,
+        scale=12,
         )
 
     assert intervention.type == "mlp"
     assert intervention.layers == [0,1,2]
     assert intervention.proportion == 0.45
     assert intervention.seed == 100
+    assert intervention.scale == 12
 
 def test_invalid_MLP_intervention_type():
     with pytest.raises(ValidationError):
@@ -66,16 +68,25 @@ def test_invalid_MLP_intervention_layers():
             layers=[],
         ) 
 
+def test_invalid_MLP_intervention_repeated_layers():
+    with pytest.raises(ValidationError):
+        MLPInterventionSettings(
+            type="mlp", 
+            layers=[1,1,2],
+        ) 
+
 def test_valid_attention_intervention_settings():
     intervention = AttentionInterventionSettings(
         type="attention", 
         layers=[0,1,2],
-        head_idxs=[0,3,6]
+        head_idxs=[0,3,6],
+        scale = 12
         )
 
     assert intervention.type == "attention"
     assert intervention.layers == [0,1,2]
     assert intervention.head_idxs == [0,3,6]
+    assert intervention.scale == 12
 
 def test_invalid_attention_intervention_type():
     with pytest.raises(ValidationError):
@@ -90,7 +101,24 @@ def test_invalid_attention_intervention_layers():
         AttentionInterventionSettings(
             type="attention", 
             layers=[],
-        )   
+            head_idxs=[0,3,6]
+        )  
+
+def test_invalid_attention_intervention_repeated_layers():
+    with pytest.raises(ValidationError):
+        AttentionInterventionSettings(
+            type="attention", 
+            layers=[1,2,3,3],
+            head_idxs=[0,3,6]
+        )
+
+def test_invalid_attention_intervention_repeated_heads():
+    with pytest.raises(ValidationError):
+        AttentionInterventionSettings(
+            type="attention", 
+            layers=[1,2,3],
+            head_idxs=[0,3,3,6]
+        ) 
 
 def test_valid_request():
     generation_a= GenerationSettings(

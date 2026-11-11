@@ -9,7 +9,7 @@ generation helpers, and attention/MLP interventions.
 - `src/kernel_backend/schemas.py`: request, generation, intervention, and response schemas.
 - `src/kernel_backend/model.py`: model and tokenizer loading.
 - `src/kernel_backend/generation.py`: generation and intervention orchestration.
-- `src/kernel_backend/interventions.py`: attention head and MLP ablation hooks.
+- `src/kernel_backend/interventions.py`: attention head and MLP scaling hooks.
 - `src/kernel_backend/errors.py`: custom error classes.
 - `tests/`: API endpoint, schema, generation helper, and intervention tests.
 - `JSON_examples/`: sample requests and responses.
