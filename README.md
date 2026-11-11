@@ -28,8 +28,7 @@ uv sync --locked --all-packages --all-groups
 - Make sure to run this after cloning or pulling dependency changes.
 
 - Manual environment activation is unnecessary. If an environment from another
-checkout is active, you can `deactivate` it first. Use `uv run` to put shared environment
-tools, including Ninja for CUDA extension builds, on PATH.
+checkout is active, you can `deactivate` it first. Use `uv run` to put shared environment tools, including Ninja for CUDA extension builds, on PATH.  
 
 - Verify the interpreter and quant package location:
 
@@ -75,7 +74,7 @@ uv run --locked --all-packages --all-groups python -m pytest -c backend/pyprojec
 
 From `backend/`, use `uv run --locked --all-packages --all-groups python -m pytest -v -ra`.
 
-- Validates schemas, generation helpers, intervention function, and API endpoint behavior. The migration baseline is **35 passed**. This suite validates API endpoints using mocked model loading and generation, but does not validate production server startup or real-model API inference.
+- Validates schemas, generation helpers, intervention functions, and API endpoint behavior. The baseline is **38 passed**. This suite validates API endpoints using mocked model loading and generation, but does not validate production server startup or real-model API inference.
 
 ### Quant CPU
 

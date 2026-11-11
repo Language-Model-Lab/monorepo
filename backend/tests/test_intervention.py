@@ -58,13 +58,14 @@ class TinyOutProj(nn.Module):
         self.last_input = x.clone()
         return self.linear(x)
 
-def test_head_ablation():
+def test_head_scaling():
     model = TinyModel()
 
-    handle, head_indices, layer_idx = interventions.add_head_ablation(
+    handle, head_indices, layer_idx = interventions.add_head_scaling(
                                                 model=model, 
                                                 head_indices= [0,2], 
-                                                layer_idx= 0)
+                                                layer_idx= 0,
+                                                scale=0.0)
     assert len(head_indices) == 2
     
     x = torch.tensor([[1., 2., 3., 4., 5., 6., 7., 8.]])
@@ -75,13 +76,14 @@ def test_head_ablation():
     assert torch.all(modified[..., [0,1,4,5]] == 0)
     assert torch.equal(modified[..., [2,3,6,7]], x[..., [2,3,6,7]])
 
-def test_mlp_ablation():
+def test_mlp_scaling():
     model = TinyModel()
 
-    handle, indices, layer_idx, proportion = interventions.add_mlp_ablation(
+    handle, indices, layer_idx, proportion = interventions.add_mlp_scaling(
                                             model=model, 
                                             layer_idx=0, 
-                                            proportion=0.5, 
+                                            proportion=0.5,
+                                            scale=0.0 
                                             )
     assert len(indices) == 2
     
@@ -98,23 +100,25 @@ def test_mlp_ablation():
     assert torch.equal(modified[..., mask], x[..., mask])
 
     
-def test_head_ablation_invalid_head():
+def test_head_scaling_invalid_head():
     model = TinyModel()
 
     with pytest.raises(InvalidHeadError):
-        handle, head_indices, layer_idx = interventions.add_head_ablation(
+        handle, head_indices, layer_idx = interventions.add_head_scaling(
                                                     model=model, 
                                                     head_indices= [999], 
-                                                    layer_idx= 0)
+                                                    layer_idx= 0,
+                                                    scale=0.0)
 
-def test_mlp_ablation_invalid_layer():
+def test_mlp_scaling_invalid_layer():
     model = TinyModel()
 
     with pytest.raises(InvalidLayerError):
-        handle, indices, layer_idx, proportion = interventions.add_mlp_ablation(
+        handle, indices, layer_idx, proportion = interventions.add_mlp_scaling(
                                                 model=model, 
                                                 layer_idx=999, 
-                                                proportion=0.5, 
+                                                proportion=0.5,
+                                                scale=0.0 
                                                 )
 
 

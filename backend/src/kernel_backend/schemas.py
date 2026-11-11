@@ -1,5 +1,5 @@
 from typing import Annotated, Literal, Union
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -44,11 +44,34 @@ class MLPInterventionSettings(StrictModel):
     layers: list[Annotated[int, Field(ge=0)]] = Field(min_length=1)
     proportion: float = Field(default=0.25, ge=0.0, le=1.0)
     seed: int = 42
+    scale: float = 0.0
+
+    @field_validator("layers")
+    @classmethod
+    def layers_must_be_unique(cls, value):
+        if len(value) != len(set(value)):
+            raise ValueError("layers must contain unique values.")
+        return value
 
 class AttentionInterventionSettings(StrictModel):
     type: Literal["attention"]
     layers: list[Annotated[int, Field(ge=0)]] = Field(min_length=1)
     head_idxs: list[Annotated[int, Field(ge=0)]] = Field(min_length=1)
+    scale: float = 0.0
+
+    @field_validator("head_idxs")
+    @classmethod
+    def head_idxs_must_be_unique(cls, value):
+        if len(value) != len(set(value)):
+            raise ValueError("head_idxs must contain unique values.")
+        return value
+    
+    @field_validator("layers")
+    @classmethod
+    def layers_must_be_unique(cls, value):
+        if len(value) != len(set(value)):
+            raise ValueError("layers must contain unique values.")
+        return value
 
 InterventionSettings = Annotated[MLPInterventionSettings|AttentionInterventionSettings,
                         Field(discriminator='type')]

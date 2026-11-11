@@ -74,7 +74,7 @@ def test_run_generation_no_intervention(monkeypatch):
 
     handle = MagicMock()
     
-    def fake_generate_text(model, tokenizer, prompt, settings):
+    def fake_generate_text(model, tokenizer, system_prompt, prompt, settings):
         return GenerationResult(
             generated_text="fake response",
             latency_ms=100.0,
@@ -117,10 +117,10 @@ def test_run_generation_mlp_intervention(monkeypatch):
 
     handle = MagicMock()
 
-    def fake_add_mlp_ablation(model, layer_idx, proportion, seed):
+    def fake_add_mlp_scaling(model, layer_idx, proportion, seed, scale):
         return handle, None, layer_idx, proportion
 
-    def fake_generate_text(model, tokenizer, prompt, settings):
+    def fake_generate_text(model, tokenizer, system_prompt, prompt, settings):
         return GenerationResult(
             generated_text="fake response",
             latency_ms=100.0,
@@ -136,8 +136,8 @@ def test_run_generation_mlp_intervention(monkeypatch):
 
     monkeypatch.setattr(
         generation,
-        "add_mlp_ablation",
-        fake_add_mlp_ablation,
+        "add_mlp_scaling",
+        fake_add_mlp_scaling,
     )
 
     model_response = generation.run_generation(
@@ -165,10 +165,10 @@ def test_run_generation_attention_intervention(monkeypatch):
 
     handle = MagicMock()
 
-    def fake_add_head_ablation(model, head_indices, layer_idx):
+    def fake_add_head_scaling(model, head_indices, layer_idx, scale):
         return handle, head_indices, layer_idx
 
-    def fake_generate_text(model, tokenizer, prompt, settings):
+    def fake_generate_text(model, tokenizer, system_prompt, prompt, settings):
         return GenerationResult(
             generated_text="fake response",
             latency_ms=100.0,
@@ -184,8 +184,8 @@ def test_run_generation_attention_intervention(monkeypatch):
 
     monkeypatch.setattr(
         generation,
-        "add_head_ablation",
-        fake_add_head_ablation,
+        "add_head_scaling",
+        fake_add_head_scaling,
     )
 
     model_response = generation.run_generation(
@@ -213,10 +213,10 @@ def test_run_generation_finally_behavior(monkeypatch):
 
     handle = MagicMock()
 
-    def fake_add_head_ablation(model, head_indices, layer_idx):
+    def fake_add_head_scaling(model, head_indices, layer_idx, scale):
         return handle, head_indices, layer_idx
 
-    def fake_generate_text(model, tokenizer, prompt, settings):
+    def fake_generate_text(model, tokenizer, system_prompt, prompt, settings):
         raise RuntimeError("generation failed")
 
     monkeypatch.setattr(
@@ -227,8 +227,8 @@ def test_run_generation_finally_behavior(monkeypatch):
 
     monkeypatch.setattr(
         generation,
-        "add_head_ablation",
-        fake_add_head_ablation,
+        "add_head_scaling",
+        fake_add_head_scaling,
     )
 
     with pytest.raises(RuntimeError):    
