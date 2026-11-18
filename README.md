@@ -1,4 +1,4 @@
-# KernelBackend
+# Language Model Lab
 
 An AI language model experimentation project combining a browser-based frontend, a FastAPI backend, weight only quantization, and CUDA benchmarking for Qwen3-0.6B.
 
@@ -8,7 +8,7 @@ The repository uses a uv workspace so each Python component declares its own dep
 
 | Path | Role |
 |---|---|
-| `frontend/` | Browser-based interface for configuring experiments, sending API requests, and displaying generated outputs and metrics. |
+| `frontend/` | Browser-based interface for experiments, sending API requests, and displaying outputs. |
 | `backend/` | API, generation settings, model loading, and attention/MLP interventions |
 | `quant/` | Quantization library, CUDA sources, fidelity checks, and benchmark scripts |
 | `notebooks/` | Exploratory model and intervention notebooks |
@@ -74,7 +74,7 @@ uv run --locked --all-packages --all-groups python -m pytest -c backend/pyprojec
 
 From `backend/`, use `uv run --locked --all-packages --all-groups python -m pytest -v -ra`.
 
-- Validates schemas, generation helpers, intervention functions, and API endpoint behavior. The baseline is **38 passed**. This suite validates API endpoints using mocked model loading and generation, but does not validate production server startup or real-model API inference.
+- Validates schemas, generation helpers, intervention functions, and API endpoint behavior. The baseline is **41 passed**. 
 
 ### Quant CPU
 
@@ -87,8 +87,7 @@ From `backend/`, use `uv run --locked --all-packages --all-groups python -m pyte
 
 - Validates quantization, layer replacement, fidelity helpers, and benchmark
 utilities. Tests use small randomly initialized models where needed. The default
-configuration excludes GPU and real-model tests: **52 passed, 15 deselected** at
-the migration baseline.
+configuration excludes GPU and real-model tests: **52 passed, 15 deselected**.
 
 ### Quant GPU
 
@@ -121,7 +120,6 @@ and generation using the real Qwen3-0.6B checkpoint.
 - Requires a CUDA GPU and model weights, which may be downloaded. 
 - The migration baseline is **6 passed, 61 deselected**.
 
-- These counts describe the migration checkpoint; update them as tests are added.
 - Record in [independent baselines] and [workspace validation] dedicated documentation
 
 ## Quant experiments
@@ -150,8 +148,7 @@ uv sync --locked --all-packages --all-groups
 ```
 
 Review version changes in the root lockfile and run the affected test suites.
-Keep pytest and other development-only tools in dependency groups. Maintain one
-root lockfile rather than creating member lockfiles.
+Keep pytest and other development-only tools in dependency groups.
 
 For a consistency check without installing packages:
 

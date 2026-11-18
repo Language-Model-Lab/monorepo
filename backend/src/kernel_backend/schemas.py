@@ -39,12 +39,11 @@ class GenerationSettings(StrictModel):
     repetition_penalty: float = Field(default=1.1, gt=0.0, le=50)
     enable_thinking: bool = False  
 
-class MLPInterventionSettings(StrictModel):
-    type: Literal["mlp"]
+
+#### Intervention Schemas ####
+
+class LayerInterventionSettings(StrictModel):
     layers: list[Annotated[int, Field(ge=0)]] = Field(min_length=1)
-    proportion: float = Field(default=0.25, ge=0.0, le=1.0)
-    seed: int = 42
-    scale: float = 0.0
 
     @field_validator("layers")
     @classmethod
@@ -53,11 +52,8 @@ class MLPInterventionSettings(StrictModel):
             raise ValueError("layers must contain unique values.")
         return value
 
-class AttentionInterventionSettings(StrictModel):
-    type: Literal["attention"]
-    layers: list[Annotated[int, Field(ge=0)]] = Field(min_length=1)
+class AttentionInterventionSettings(LayerInterventionSettings):
     head_idxs: list[Annotated[int, Field(ge=0)]] = Field(min_length=1)
-    scale: float = 0.0
 
     @field_validator("head_idxs")
     @classmethod
@@ -65,14 +61,33 @@ class AttentionInterventionSettings(StrictModel):
         if len(value) != len(set(value)):
             raise ValueError("head_idxs must contain unique values.")
         return value
-    
-    @field_validator("layers")
-    @classmethod
-    def layers_must_be_unique(cls, value):
-        if len(value) != len(set(value)):
-            raise ValueError("layers must contain unique values.")
-        return value
 
-InterventionSettings = Annotated[MLPInterventionSettings|AttentionInterventionSettings,
-                        Field(discriminator='type')]
+class MLPScalingSettings(LayerInterventionSettings):
+    type: Literal["mlp"]
+    proportion: float = Field(default=0.25, ge=0.0, le=1.0)
+    seed: int = 42
+    scale: float = 0.0
+
+class AttentionScalingSettings(AttentionInterventionSettings):
+    type: Literal["attention"]
+    scale: float = 0.0
+
+class MLPNoiseSettings(LayerInterventionSettings):
+    type: Literal["mlp_noise"]
+    proportion: float = Field(default=0.25, ge=0.0, le=1.0)
+    seed: int = 42
+    sigma: float = Field(gt=0.0)
+
+class AttentionNoiseSettings(AttentionInterventionSettings):
+    type: Literal["attention_noise"]
+    sigma: float = Field(gt=0.0)
+    seed: int = 42
+    
+InterventionSettings = Annotated[
+    MLPScalingSettings
+    | AttentionScalingSettings
+    | MLPNoiseSettings
+    | AttentionNoiseSettings,
+    Field(discriminator="type"),
+]
 

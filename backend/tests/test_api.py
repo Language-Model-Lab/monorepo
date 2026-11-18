@@ -4,8 +4,8 @@ from kernel_backend.schemas import (
     GenerateRequest,
     GenerateResponse,
     ExperimentConfiguration,
-    MLPInterventionSettings,
-    AttentionInterventionSettings
+    MLPScalingSettings,
+    AttentionScalingSettings
     )
 from transformers import (
     AutoTokenizer, 
