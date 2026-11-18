@@ -1,4 +1,9 @@
-from kernel_backend.interventions import add_head_scaling, add_mlp_scaling
+from kernel_backend.interventions import (
+            add_head_scaling, 
+            add_mlp_scaling,
+            add_head_noise,
+            add_mlp_noise
+            )
 import torch
 import time
 from dataclasses import dataclass
@@ -58,11 +63,12 @@ def run_generation(model, tokenizer, prompt: str, request:ExperimentConfiguratio
         if intervention_settings is not None:
             if intervention_settings.type == "mlp":
                 for layer_idx in intervention_settings.layers:
+                    layer_seed = intervention_settings.seed + layer_idx
                     handle, _, _, _ = add_mlp_scaling(
                         model=model, 
                         layer_idx=layer_idx, 
                         proportion= intervention_settings.proportion, 
-                        seed=intervention_settings.seed,
+                        seed=layer_seed,
                         scale=intervention_settings.scale
                         )
                     handles.append(handle)
@@ -73,6 +79,28 @@ def run_generation(model, tokenizer, prompt: str, request:ExperimentConfiguratio
                         layer_idx=layer_idx, 
                         head_indices= intervention_settings.head_idxs, 
                         scale=intervention_settings.scale,
+                        )
+                    handles.append(handle)
+            elif intervention_settings.type == "mlp_noise":
+                for layer_idx in intervention_settings.layers:
+                    layer_seed = intervention_settings.seed + layer_idx
+                    handle, _, _, _, _, _ = add_mlp_noise(
+                        model=model, 
+                        layer_idx=layer_idx, 
+                        proportion= intervention_settings.proportion,
+                        sigma= intervention_settings.sigma, 
+                        seed=layer_seed,
+                        )
+                    handles.append(handle)
+            elif intervention_settings.type == "attention_noise":
+                for layer_idx in intervention_settings.layers:
+                    layer_seed = intervention_settings.seed + layer_idx
+                    handle, _, _, _, _ = add_head_noise(
+                        model=model, 
+                        layer_idx=layer_idx, 
+                        head_indices= intervention_settings.head_idxs, 
+                        sigma= intervention_settings.sigma, 
+                        seed=layer_seed,
                         )
                     handles.append(handle)
                         

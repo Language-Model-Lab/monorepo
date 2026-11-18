@@ -4,8 +4,8 @@ InterventionSettings,
 GenerateRequest,
 GenerateResponse,
 ExperimentConfiguration,
-MLPInterventionSettings,
-AttentionInterventionSettings
+MLPScalingSettings,
+AttentionScalingSettings
 )
 from transformers import (
     AutoTokenizer, 
@@ -105,11 +105,11 @@ def test_run_generation_mlp_intervention(monkeypatch):
     tokenizer = MagicMock()
     prompt = "test"
     generation_settings = GenerationSettings()
-    intervention_settings = MLPInterventionSettings(
-                                                    type="mlp", 
-                                                    layers=[0,1,2,3],
-                                                    proportion=0.5,
-                                                    seed=42)
+    intervention_settings = MLPScalingSettings(
+                                                type="mlp", 
+                                                layers=[0,1,2,3],
+                                                proportion=0.5,
+                                                seed=42)
     request = ExperimentConfiguration(
                                         generation=generation_settings, 
                                         intervention=intervention_settings
@@ -154,7 +154,7 @@ def test_run_generation_attention_intervention(monkeypatch):
     tokenizer = MagicMock()
     prompt = "test"
     generation_settings = GenerationSettings()
-    intervention_settings = AttentionInterventionSettings(
+    intervention_settings = AttentionScalingSettings(
                                                     type="attention", 
                                                     layers=[0,1,2,3],
                                                     head_idxs=[0,1,2])
@@ -202,7 +202,7 @@ def test_run_generation_finally_behavior(monkeypatch):
     tokenizer = MagicMock()
     prompt = "test"
     generation_settings = GenerationSettings()
-    intervention_settings = AttentionInterventionSettings(
+    intervention_settings = AttentionScalingSettings(
                                                     type="attention", 
                                                     layers=[0,1,2,3],
                                                     head_idxs=[0,1,2])

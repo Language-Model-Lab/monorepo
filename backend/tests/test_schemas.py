@@ -6,8 +6,10 @@ InterventionSettings,
 GenerateRequest,
 GenerateResponse,
 ExperimentConfiguration,
-MLPInterventionSettings,
-AttentionInterventionSettings
+MLPScalingSettings,
+AttentionScalingSettings,
+MLPNoiseSettings,
+AttentionNoiseSettings
 )
 
 import pytest
@@ -40,7 +42,7 @@ def test_invalid_top_p():
         GenerationSettings(top_p=1.01)
 
 def test_valid_MLP_intervention_settings():
-    intervention = MLPInterventionSettings(
+    intervention = MLPScalingSettings(
         type="mlp", 
         layers=[0,1,2],
         proportion=0.45,
@@ -56,27 +58,34 @@ def test_valid_MLP_intervention_settings():
 
 def test_invalid_MLP_intervention_type():
     with pytest.raises(ValidationError):
-        MLPInterventionSettings(
+        MLPScalingSettings(
             type="mlb", 
             layers=[0,1,2],
         )   
 
 def test_invalid_MLP_intervention_layers():
     with pytest.raises(ValidationError):
-        MLPInterventionSettings(
+        MLPScalingSettings(
             type="mlp", 
             layers=[],
         ) 
 
 def test_invalid_MLP_intervention_repeated_layers():
     with pytest.raises(ValidationError):
-        MLPInterventionSettings(
+        MLPScalingSettings(
             type="mlp", 
             layers=[1,1,2],
         ) 
 
+def test_invalid_MLP_noise_intervention_repeated_layers():
+    with pytest.raises(ValidationError):
+        MLPNoiseSettings(
+            type="mlp_noise", 
+            layers=[1,1,2],
+        ) 
+
 def test_valid_attention_intervention_settings():
-    intervention = AttentionInterventionSettings(
+    intervention = AttentionScalingSettings(
         type="attention", 
         layers=[0,1,2],
         head_idxs=[0,3,6],
@@ -90,7 +99,7 @@ def test_valid_attention_intervention_settings():
 
 def test_invalid_attention_intervention_type():
     with pytest.raises(ValidationError):
-        AttentionInterventionSettings(
+        AttentionScalingSettings(
             type="attentio", 
             layers=[0,1,2],
             head_idxs=[0,3,6]
@@ -98,7 +107,7 @@ def test_invalid_attention_intervention_type():
 
 def test_invalid_attention_intervention_layers():
     with pytest.raises(ValidationError):
-        AttentionInterventionSettings(
+        AttentionScalingSettings(
             type="attention", 
             layers=[],
             head_idxs=[0,3,6]
@@ -106,7 +115,7 @@ def test_invalid_attention_intervention_layers():
 
 def test_invalid_attention_intervention_repeated_layers():
     with pytest.raises(ValidationError):
-        AttentionInterventionSettings(
+        AttentionScalingSettings(
             type="attention", 
             layers=[1,2,3,3],
             head_idxs=[0,3,6]
@@ -114,7 +123,7 @@ def test_invalid_attention_intervention_repeated_layers():
 
 def test_invalid_attention_intervention_repeated_heads():
     with pytest.raises(ValidationError):
-        AttentionInterventionSettings(
+        AttentionScalingSettings(
             type="attention", 
             layers=[1,2,3],
             head_idxs=[0,3,3,6]
@@ -129,7 +138,7 @@ def test_valid_request():
         repetition_penalty=1.55
         )
 
-    intervention_a=MLPInterventionSettings(
+    intervention_a=MLPScalingSettings(
         type="mlp", 
         layers=[0,1,2,3],
         proportion=0.25,
@@ -144,7 +153,7 @@ def test_valid_request():
         repetition_penalty=1.3
         )
 
-    intervention_b=AttentionInterventionSettings(
+    intervention_b=AttentionScalingSettings(
         type="attention", 
         layers=[0,1,2],
         head_idxs=[0,1,2]
@@ -282,7 +291,7 @@ def test_generation_settings_extra_fields():
 
 def test_MLP_intervention_settings_extra_fields():
     with pytest.raises(ValidationError):
-        MLPInterventionSettings(
+        MLPScalingSettings(
             type="mlp", 
             layers=[0,1,2],
             proportion=0.45,
@@ -292,7 +301,7 @@ def test_MLP_intervention_settings_extra_fields():
 
 def test_attention_intervention_settings_extra_fields():
     with pytest.raises(ValidationError):
-        AttentionInterventionSettings(
+        AttentionScalingSettings(
             type="attention", 
             layers=[0,1,2],
             head_idxs=[0,1,2],
@@ -308,7 +317,7 @@ def test_request_extra_fields():
         repetition_penalty=1.3
         )
 
-    intervention=MLPInterventionSettings(
+    intervention=MLPScalingSettings(
         type="mlp", 
         layers=[0,1,2],
         proportion=0.45,
@@ -353,7 +362,7 @@ def test_MLP_intervention_discriminator():
     },
     )
 
-    assert isinstance(config.intervention, MLPInterventionSettings)
+    assert isinstance(config.intervention, MLPScalingSettings)
 
 def test_attention_intervention_discriminator():
     settings = GenerationSettings(
@@ -373,4 +382,48 @@ def test_attention_intervention_discriminator():
         },
     )
 
-    assert isinstance(config.intervention, AttentionInterventionSettings)
+    assert isinstance(config.intervention, AttentionScalingSettings)
+
+def test_attention_noise_intervention_discriminator():
+    settings = GenerationSettings(
+        max_new_tokens=75, 
+        temperature=0.5, 
+        top_k=22, 
+        top_p=0.5, 
+        repetition_penalty=1.3
+        )
+
+    config = ExperimentConfiguration(
+        generation=settings,
+        intervention={
+        "type": "attention_noise",
+        "layers": [0],
+        "head_idxs":[0,2,3],
+        "sigma": 2.0,
+        "seed": 22,
+        },
+    )
+
+    assert isinstance(config.intervention, AttentionNoiseSettings)
+
+def test_MLP_noise_intervention_discriminator():
+    settings = GenerationSettings(
+        max_new_tokens=75, 
+        temperature=0.5, 
+        top_k=22, 
+        top_p=0.5, 
+        repetition_penalty=1.3
+        )
+
+    config = ExperimentConfiguration(
+        generation=settings,
+        intervention={
+        "type": "mlp_noise",
+        "layers": [0,1,2],
+        "proportion": 0.25,
+        "seed": 42,
+        "sigma": 2.0,
+        },
+        )
+
+    assert isinstance(config.intervention, MLPNoiseSettings)
